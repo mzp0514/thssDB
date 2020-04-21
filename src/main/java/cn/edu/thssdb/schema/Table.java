@@ -21,6 +21,7 @@ public class Table implements Iterable<Row> {
 	public String filePath;
 	public ArrayList<Column> columns;
 	public BPlusTree<Entry, Row> index;
+	public int primaryKey;
 	private int primaryIndex;
 	File metaFile;
 	File dataFile;
@@ -39,7 +40,7 @@ public class Table implements Iterable<Row> {
 			this.columns.add(columns[i]);
 			nameSet.add(columns[i].getName());
 			if(columns[i].isPrimary()){
-				this.primaryIndex = i;
+				this.primaryKey = i;
 			}
 		}
 		if (nameSet.size() != this.columns.size()) {
@@ -82,14 +83,29 @@ public class Table implements Iterable<Row> {
 	public void insert(Row row) throws IOException {
 		// TODO
 		ArrayList<Entry> entries = row.getEntries();
-		this.index.put(entries.get(this.primaryIndex), row);
+		this.index.put(entries.get(this.primaryKey), row);
+		this.serialize();
+	}
+
+	public void delete(Row row) throws IOException{
+		try {
+			this.index.remove(row.getEntries().get(this.primaryKey));
+		}
+		catch (Exception e){
+
+		}
 		this.serialize();
 	}
 
 	public void delete(ArrayList<Row> rows) throws IOException {
 		// TODO
 		for(Row row: rows) {
-			this.index.remove(row.getEntries().get(this.primaryIndex));
+			try {
+				this.index.remove(row.getEntries().get(this.primaryKey));
+			}
+			catch (Exception e){
+				continue;
+			}
 		}
 		this.serialize();
 	}
@@ -99,7 +115,7 @@ public class Table implements Iterable<Row> {
 		// TODO
 		for(Row row : rows) {
 			int attrId = this.getAttrIndex(attrName);
-			Entry key = row.getEntries().get(this.primaryIndex);
+			Entry key = row.getEntries().get(this.primaryKey);
 			Row dest = row;
 			dest.updateEntry(attrId, new Entry((Comparable) attrValue));
 
@@ -119,10 +135,16 @@ public class Table implements Iterable<Row> {
 
 		switch (comp){
 			case EQUAL:
-				if(attrId == this.primaryIndex){
-					res.add(this.index.get(entry));
+				if(attrId == this.primaryKey){
+					try{
+						res.add(this.index.get(entry));
+					}
+					catch (Exception e){
+
+					}
 				}
 				else{
+
 					while(it.hasNext()){
 						Row temp = it.next().getValue();
 						if(temp.getEntries().get(attrId).equals(entry)){
@@ -133,6 +155,7 @@ public class Table implements Iterable<Row> {
 				break;
 
 			case NEQUAL:
+
 				while(it.hasNext()){
 					Row temp = it.next().getValue();
 					if(!temp.getEntries().get(attrId).equals(entry)){
@@ -142,40 +165,61 @@ public class Table implements Iterable<Row> {
 				break;
 
 			case LESS:
+
 				while(it.hasNext()){
 					Row temp = it.next().getValue();
 					if(temp.getEntries().get(attrId).compareTo(entry) == -1){
 						res.add(temp);
 					}
-					else if (attrId == this.primaryIndex){
+					else if (attrId == this.primaryKey){
 						break;
 					}
 				}
 				break;
 
 			case NLESS:
-				while(it.hasNext()){
-					Row temp = it.next().getValue();
-					if(temp.getEntries().get(attrId).compareTo(entry) != -1 ){
-						res.add(temp);
-						if(attrId == this.primaryIndex){
-							while(it.hasNext()){
-								res.add(it.next().getValue());
+				if(attrId == this.primaryKey){
+					BPlusTreeIterator<Entry, Row> it2 = this.index.find(entry);
+					while(it2.hasNext()){
+						Row temp = it2.next().getValue();
+						if(temp.getEntries().get(attrId).compareTo(entry) != -1 ){
+							res.add(temp);
+							while(it2.hasNext()){
+								res.add(it2.next().getValue());
 							}
 						}
 					}
 				}
+				else{
+					while(it.hasNext()){
+						Row temp = it.next().getValue();
+						if(temp.getEntries().get(attrId).compareTo(entry) != -1 ){
+							res.add(temp);
+						}
+					}
+				}
+
 				break;
 
 			case GREATER:
-				while(it.hasNext()){
-					Row temp = it.next().getValue();
-					if(temp.getEntries().get(attrId).compareTo(entry) == 1 ){
-						res.add(temp);
-						if(attrId == this.primaryIndex){
-							while(it.hasNext()){
-								res.add(it.next().getValue());
+
+				if(attrId == this.primaryKey){
+					BPlusTreeIterator<Entry, Row> it2 = this.index.find(entry);
+					while(it2.hasNext()){
+						Row temp = it2.next().getValue();
+						if(temp.getEntries().get(attrId).compareTo(entry) == 1 ){
+							res.add(temp);
+							while(it2.hasNext()){
+								res.add(it2.next().getValue());
 							}
+						}
+					}
+				}
+				else{
+					while(it.hasNext()){
+						Row temp = it.next().getValue();
+						if(temp.getEntries().get(attrId).compareTo(entry) == 1 ){
+							res.add(temp);
 						}
 					}
 				}
@@ -187,7 +231,7 @@ public class Table implements Iterable<Row> {
 					if(temp.getEntries().get(attrId).compareTo(entry) != 1){
 						res.add(temp);
 					}
-					else if (attrId == this.primaryIndex){
+					else if (attrId == this.primaryKey){
 						break;
 					}
 				}

@@ -38,6 +38,16 @@ public final class BPlusTreeInternalNode<K extends Comparable<K>, V> extends BPl
 		return searchChild(key).get(key);
 	}
 
+	BPlusTreeLeafNode<K, V> find(K key){
+		BPlusTreeNode<K, V> node = searchChild(key);
+		if(node instanceof BPlusTreeLeafNode){
+			return (BPlusTreeLeafNode<K, V>) node;
+		}
+		else{
+			return ((BPlusTreeInternalNode)node).find(key);
+		}
+	}
+
 	@Override
 	void put(K key, V value) {
 		BPlusTreeNode<K, V> child = searchChild(key);
