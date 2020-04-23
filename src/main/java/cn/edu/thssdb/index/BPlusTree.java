@@ -63,7 +63,7 @@ public final class BPlusTree<K extends Comparable<K>, V> implements Iterable<Pai
 	}
 
 	public BPlusTreeIterator<K, V> find(K key) {
-		if(size == 1){
+		if(root instanceof BPlusTreeLeafNode){
 			return new BPlusTreeIterator<K, V>((BPlusTreeLeafNode) root);
 		}
 		return new BPlusTreeIterator<>(((BPlusTreeInternalNode)root).find(key));

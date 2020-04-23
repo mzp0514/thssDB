@@ -8,11 +8,11 @@ import javafx.util.Pair;
 
 import java.io.IOException;
 
-//public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
-public final class BPlusTreeP {
+public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
+//public final class BPlusTreeP {
 	BPlusTreeNodeP root;
 	BPlusTreeInfo info;
-	int size;
+	int size = 0;
 	// node type(4)|prev page(4)|next page(4)|node size(4)
 
 	public BPlusTreeP(String filename, int keyId, Column[] columns) throws IOException {
@@ -22,11 +22,15 @@ public final class BPlusTreeP {
 
 	public BPlusTreeP(String filename) throws IOException, ClassNotFoundException {
 		info = new BPlusTreeInfo(filename);
-		root = new BPlusTreeLeafNodeP(info.rootPage, info);
-	}
+		int type = info.readNodeType(info.rootPage);
 
-	public int size() {
-		return size;
+		if(type == BPlusNodeType.LEAF.ordinal()){
+			root = new BPlusTreeLeafNodeP(info.rootPage, info);
+		}
+		else{
+			root = new BPlusTreeInternalNodeP(info.rootPage, info);
+		}
+
 	}
 
 	public Row get(Entry key) throws IOException {
@@ -90,15 +94,24 @@ public final class BPlusTreeP {
 		}
 	}
 
-//	@Override
-//	public BPlusTreeIteratorP iterator() {
-//		return new BPlusTreeIteratorP(this);
-//	}
+	@Override
+	public BPlusTreeIteratorP iterator() {
+		try {
+			return new BPlusTreeIteratorP(this);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	public BPlusTreeIteratorP find(Entry key) throws IOException {
-		if(size == 1){
+		if(root instanceof BPlusTreeLeafNodeP){
 			return new BPlusTreeIteratorP((BPlusTreeLeafNodeP) root);
 		}
 		return new BPlusTreeIteratorP(((BPlusTreeInternalNodeP)root).find(key));
+	}
+
+	public int size() {
+		return size;
 	}
 }

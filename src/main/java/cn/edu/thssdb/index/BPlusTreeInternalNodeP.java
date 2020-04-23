@@ -4,7 +4,6 @@ import cn.edu.thssdb.schema.Entry;
 import cn.edu.thssdb.schema.Row;
 import cn.edu.thssdb.type.BPlusNodeType;
 import cn.edu.thssdb.type.ColumnType;
-import cn.edu.thssdb.utils.Global;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -96,17 +95,7 @@ public final class BPlusTreeInternalNodeP extends BPlusTreeNodeP {
 		return child.get(key);
 	}
 
-	private BPlusTreeNodeP page2instance(int page) throws IOException {
-		int type = info.readNodeType(page);
-		BPlusTreeNodeP child;
-		if(type == BPlusNodeType.LEAF.ordinal()){
-			child = new BPlusTreeLeafNodeP(page, info);
-		}
-		else{
-			child = new BPlusTreeInternalNodeP(page, info);
-		}
-		return child;
-	}
+
 
 	private BPlusTreeNodeP getChildInstance(Entry key) throws IOException {
 		int childPage = searchChild(key);
@@ -180,16 +169,10 @@ public final class BPlusTreeInternalNodeP extends BPlusTreeNodeP {
 
 	@Override
 	Entry getFirstLeafKey() throws IOException {
-		BPlusTreeNodeP N;
-		int type = info.readNodeType(children.get(0));
-		if(type == BPlusNodeType.LEAF.ordinal()){
-			N = new BPlusTreeLeafNodeP(children.get(0), info);
-		}
-		else{
-			N = new BPlusTreeInternalNodeP(children.get(0), info);
-		}
-		return N.getFirstLeafKey();
+		return page2instance(children.get(0)).getFirstLeafKey();
 	}
+
+
 
 	@Override
 	Pair<Integer, Entry> split() throws IOException {
@@ -232,6 +215,16 @@ public final class BPlusTreeInternalNodeP extends BPlusTreeNodeP {
 	@Override
 	boolean isUnderFlow() {
 		return nodeSize < info.internalDataMaxLen / 2;
+	}
+
+	BPlusTreeLeafNodeP getFirstLeaf() throws IOException {
+		BPlusTreeNodeP node = page2instance(children.get(0));
+		if(node instanceof BPlusTreeLeafNodeP){
+			return (BPlusTreeLeafNodeP) node;
+		}
+		else{
+			return ((BPlusTreeInternalNodeP) node).getFirstLeaf();
+		}
 	}
 
 	private int searchChild(Entry key) {

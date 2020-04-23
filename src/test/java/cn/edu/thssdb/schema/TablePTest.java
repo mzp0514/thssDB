@@ -14,9 +14,9 @@ import java.util.HashSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class TableTest {
+public class TablePTest {
 
-	private Table table;
+	private TableP table;
 
 	private ArrayList<Row> rows;
 
@@ -27,9 +27,9 @@ public class TableTest {
 		columns[0] = new Column("id", ColumnType.INT, 1, true , 0);
 		columns[1] = new Column("name", ColumnType.STRING, 0, true , 3);
 		columns[2] = new Column("class", ColumnType.STRING, 0, true , 2);
-		columns[3] = new Column("height", ColumnType.FLOAT, 0, true , 0);
+		columns[3] = new Column("height", ColumnType.DOUBLE, 0, true , 0);
 		columns[4] = new Column("weight", ColumnType.DOUBLE, 0, true , 0);
-		this.table = new Table("dbtest", "tb", columns);
+		this.table = new TableP("dbtest", "tb", columns);
 
 		this.rows = new ArrayList<>();
 	}
@@ -66,7 +66,7 @@ public class TableTest {
 		entries[1] = new Entry("mzp");
 		entries[2] = new Entry("73");
 		ArrayList<Row> rows = new ArrayList<>();
-		for(int i = 0; i < 100; i++) {
+		for(int i = 0; i < 200; i++) {
 			entries[0] = new Entry(i);
 			entries[3] = new Entry((double) i);
 			entries[4] = new Entry((double) i);
@@ -75,12 +75,11 @@ public class TableTest {
 		}
 
 		table.delete(rows);
-		table.delete(rows);
-		assertEquals(table.index.size(), 900);
+		assertEquals(800, table.index.size());
 	}
 
 	@Test
-	public void selectTest() throws IOException {
+	public void selectTest() throws IOException, ClassNotFoundException {
 		insertTest();
 		ArrayList<Row> res1 = table.select("id", 100, ComparisonType.EQUAL);
 
@@ -91,7 +90,7 @@ public class TableTest {
 			}
 		}
 
-		assertEquals(res2, res1);
+		assertEquals(res2.toString(), res1.toString());
 	}
 
 	@Test
@@ -106,7 +105,7 @@ public class TableTest {
 			}
 		}
 
-		assertEquals(res2, res1);
+		assertEquals(res2.size(), res1.size());
 	}
 
 	@Test
@@ -121,7 +120,7 @@ public class TableTest {
 			}
 		}
 
-		assertEquals(res2, res1);
+		assertEquals(res2.toString(), res1.toString());
 	}
 
 	@Test
@@ -136,7 +135,7 @@ public class TableTest {
 			}
 		}
 
-		assertEquals(res2, res1);
+		assertEquals(res2.toString(), res1.toString());
 	}
 
 	@Test
@@ -151,7 +150,7 @@ public class TableTest {
 			}
 		}
 
-		assertEquals(res2, res1);
+		assertEquals(res2.toString(), res1.toString());
 	}
 
 	@Test
@@ -166,7 +165,7 @@ public class TableTest {
 			}
 		}
 
-		assertEquals(res2, res1);
+		assertEquals(res2.toString(), res1.toString());
 	}
 
 	@Test
@@ -181,7 +180,7 @@ public class TableTest {
 			}
 		}
 
-		assertEquals(res2, res1);
+		assertEquals(res2.toString(), res1.toString());
 	}
 
 	@Test
@@ -196,7 +195,7 @@ public class TableTest {
 			}
 		}
 
-		assertEquals(res2, res1);
+		assertEquals(res2.toString(), res1.toString());
 	}
 
 	@Test
@@ -274,5 +273,3 @@ public class TableTest {
 		assertEquals(res2, res1);
 	}
 }
-
-

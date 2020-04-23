@@ -2,9 +2,8 @@ package cn.edu.thssdb.index;
 
 import cn.edu.thssdb.schema.Entry;
 import cn.edu.thssdb.schema.Row;
-import cn.edu.thssdb.utils.Global;
+import cn.edu.thssdb.type.BPlusNodeType;
 import javafx.util.Pair;
-import org.omg.CORBA.INTERNAL;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,7 +16,7 @@ abstract class BPlusTreeNodeP{
 	// pageId(4)|prev page(4)|next page(4)|node type(4)|node size(4)
 	int pageId;
 	int prevPage;
-	int nextPage;
+	int nextPage = -1;
 	int nodeType;
 	int nodeSize;
 
@@ -47,6 +46,7 @@ abstract class BPlusTreeNodeP{
 
 	abstract boolean isUnderFlow();
 
+
 	int binarySearch(Entry key) {
 		return Collections.binarySearch(keys.subList(0, nodeSize), key);
 	}
@@ -64,6 +64,18 @@ abstract class BPlusTreeNodeP{
 			keys.set(i, keys.get(i + 1));
 		}
 		nodeSize--;
+	}
+
+	BPlusTreeNodeP page2instance(int page) throws IOException {
+		int type = info.readNodeType(page);
+		BPlusTreeNodeP child;
+		if(type == BPlusNodeType.LEAF.ordinal()){
+			child = new BPlusTreeLeafNodeP(page, info);
+		}
+		else{
+			child = new BPlusTreeInternalNodeP(page, info);
+		}
+		return child;
 	}
 
 	abstract void write() throws IOException;

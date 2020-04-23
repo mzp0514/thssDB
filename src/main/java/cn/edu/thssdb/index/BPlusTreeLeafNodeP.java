@@ -6,11 +6,9 @@ import cn.edu.thssdb.schema.Entry;
 import cn.edu.thssdb.schema.Row;
 import cn.edu.thssdb.type.BPlusNodeType;
 import cn.edu.thssdb.type.ColumnType;
-import cn.edu.thssdb.utils.Global;
 import javafx.util.Pair;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -99,11 +97,11 @@ public class BPlusTreeLeafNodeP extends BPlusTreeNodeP{
 	}
 
 	boolean hasNext(){
-		return next != null;
+		return nextPage != -1;
 	}
 
-	int next(){
-		return nextPage;
+	BPlusTreeNodeP next() throws IOException {
+		return page2instance(nextPage);
 	}
 
 	@Override

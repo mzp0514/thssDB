@@ -69,53 +69,39 @@ public class BPlusTreePTest {
 				System.out.println("type:" + child.nodeType);
 				System.out.println("id:" + child.pageId);
 				System.out.println(child.keys.subList(0, child.nodeSize).toString());
-				System.out.println("size:" + child.nodeSize + "\n");
-
+				System.out.println("size:" + child.nodeSize);
+				System.out.println("next:" + child.nextPage + "\n");
 			}
 			else{
-				child = new BPlusTreeInternalNodeP(i, tree.info);
-				System.out.println("type:" + child.nodeType);
-				System.out.println("id:" + child.pageId);
-				System.out.println(child.keys.subList(0, child.nodeSize).toString());
-				System.out.println(((BPlusTreeInternalNodeP) child).children.toString());
-				System.out.println("size:" + child.nodeSize + "\n");
+//
+//				child = new BPlusTreeInternalNodeP(i, tree.info);
+//				System.out.println("type:" + child.nodeType);
+//				System.out.println("id:" + child.pageId);
+//				System.out.println(child.keys.subList(0, child.nodeSize).toString());
+//				System.out.println(((BPlusTreeInternalNodeP) child).children.toString());
+//				System.out.println("size:" + child.nodeSize + "\n");
 			}
 		}
 	}
 
 	@Test
-	public void deleteTest() throws IOException, ClassNotFoundException {
-
-		for(int i = 0; i < 100; i++) {
-			tree.remove(new Entry(i));
-			keys.remove(new Entry(i));
-		}
-
-		for (Entry key : keys) {
-			// System.out.println(key.toString());
-			System.out.println(map.get(key).toString() + " " + tree.get(key).toString());
-		}
-
-
-	}
-
-	@Test
-	public void testGet() throws IOException, ClassNotFoundException {
+	public void testRecover() throws IOException, ClassNotFoundException {
 		BPlusTreeP tree2 = new BPlusTreeP("data/dbtest/index.data");
-		printTree(tree2);
+
 		for (Entry key : keys)
 			assertEquals(map.get(key).toString(), tree2.get(key).toString());//比较所有的get结果是否一样
 	}
 //
-//	@Test
-//	public void testRemove() {
-//		int size = keys.size();
-//		for (int i = 0; i < size; i += 2)
-//			tree.remove(keys.get(i));//remove掉一半的数据
-//		assertEquals(size / 2, tree.size());//比较size是否等于原来的一半
-//		for (int i = 1; i < size; i += 2)
-//			assertEquals(map.get(keys.get(i)), tree.get(keys.get(i)));//删除一半后再比较另一半的get结果是否一样
-//	}
+	@Test
+	public void testRemove() throws IOException {
+		int size = keys.size();
+		for (int i = 0; i < size; i += 2)
+			tree.remove(keys.get(i));//remove掉一半的数据
+		assertEquals(size / 2, tree.size());//比较size是否等于原来的一半
+		for (int i = 1; i < size; i += 2)
+			assertEquals(map.get(keys.get(i)).toString(), tree.get(keys.get(i)).toString());//删除一半后再比较另一半的get结果是否一样
+	}
+
 //
 //	@Test
 //	public void testIterator() {

@@ -31,4 +31,5 @@ public class Global {
 		return s;
 	}
 
+
 }
