@@ -22,7 +22,6 @@ public class Table implements Iterable<Row> {
 	public ArrayList<Column> columns;
 	public BPlusTree<Entry, Row> index;
 	public int primaryKey;
-	private int primaryIndex;
 	File metaFile;
 	File dataFile;
 

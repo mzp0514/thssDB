@@ -20,8 +20,12 @@ public class Column implements Comparable<Column>, Serializable {
 	}
 
 	public String getName(){
-		return this.name;
+		return name;
 	}
+
+	public ColumnType getType(){ return type;}
+
+	public int getMaxLength(){ return maxLength;}
 
 	public boolean isPrimary(){
 		return primary == 1;

@@ -25,8 +25,8 @@ public class TableTest {
 		Column[] columns = new Column[5];
 //		String name, ColumnType type, int primary, boolean notNull, int maxLength
 		columns[0] = new Column("id", ColumnType.INT, 1, true , 0);
-		columns[1] = new Column("name", ColumnType.STRING, 0, true , 10);
-		columns[2] = new Column("class", ColumnType.STRING, 0, true , 10);
+		columns[1] = new Column("name", ColumnType.STRING, 0, true , 3);
+		columns[2] = new Column("class", ColumnType.STRING, 0, true , 2);
 		columns[3] = new Column("height", ColumnType.FLOAT, 0, true , 0);
 		columns[4] = new Column("weight", ColumnType.DOUBLE, 0, true , 0);
 		this.table = new Table("dbtest", "tb", columns);
@@ -45,7 +45,7 @@ public class TableTest {
 		Entry[] entries = new Entry[5];
 		entries[0] = new Entry(0);
 		entries[1] = new Entry("mzp");
-		entries[2] = new Entry("软件73");
+		entries[2] = new Entry("73");
 
 		for(int i = 0; i < 200; i++){
 			entries[0] = new Entry(i);
@@ -64,7 +64,7 @@ public class TableTest {
 		Entry[] entries = new Entry[5];
 		entries[0] = new Entry(0);
 		entries[1] = new Entry("mzp");
-		entries[2] = new Entry("软件73");
+		entries[2] = new Entry("73");
 		ArrayList<Row> rows = new ArrayList<>();
 		for(int i = 0; i < 100; i++) {
 			entries[0] = new Entry(i);
