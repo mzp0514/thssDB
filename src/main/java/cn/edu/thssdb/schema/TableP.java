@@ -133,7 +133,7 @@ public class TableP implements Iterable<Row> {
 				else{
 					it = index.iterator();
 					while(it.hasNext()){
-						it = index.iterator();
+
 						Row temp = it.next().getValue();
 						if(temp.getEntries().get(attrId).equals(entry)){
 							res.add(temp);
@@ -239,17 +239,14 @@ public class TableP implements Iterable<Row> {
 		os1.close();
 	}
 
-
-
 	private void metaDeserialize() throws IOException, ClassNotFoundException {
 		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(this.metaFile));
 		this.columns = (ArrayList<Column>) ois.readObject();
 	}
 
-
 	private int getAttrIndex(String attrName){
 		int attrId = 0;
-		while(this.columns.get(attrId).getName() != attrName){
+		while(!this.columns.get(attrId).getName().equals(attrName)){
 			attrId ++;
 		}
 		return attrId;

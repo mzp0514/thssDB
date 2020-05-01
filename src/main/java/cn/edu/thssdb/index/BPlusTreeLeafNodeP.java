@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class BPlusTreeLeafNodeP extends BPlusTreeNodeP{
-	// pageId(4)|prev page(4)|next page(4)|node type(4) root 0  internal 1  leaf 2|node size(4)
-
 	ArrayList<Row> values;
 
 	private BPlusTreeLeafNodeP next;

@@ -12,8 +12,6 @@ import java.util.Collections;
 abstract class BPlusTreeNodeP{
 
 	ArrayList<Entry> keys;
-
-	// pageId(4)|prev page(4)|next page(4)|node type(4)|node size(4)
 	int pageId;
 	int prevPage;
 	int nextPage = -1;

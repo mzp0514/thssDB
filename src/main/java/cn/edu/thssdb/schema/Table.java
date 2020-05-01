@@ -273,7 +273,7 @@ public class Table implements Iterable<Row> {
 
 	private int getAttrIndex(String attrName){
 		int attrId = 0;
-		while(this.columns.get(attrId).getName() != attrName){
+		while(!this.columns.get(attrId).getName().equals(attrName)){
 			attrId ++;
 		}
 		return attrId;

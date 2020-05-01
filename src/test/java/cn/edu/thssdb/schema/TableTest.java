@@ -37,6 +37,7 @@ public class TableTest {
 	@Test
 	public void resume() throws IOException, ClassNotFoundException {
 		Table table2 = new Table("dbtest", "tb");
+		assertEquals(table.index.size(),table2.index.size());
 	}
 
 

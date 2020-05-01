@@ -12,7 +12,7 @@ public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
 //public final class BPlusTreeP {
 	BPlusTreeNodeP root;
 	BPlusTreeInfo info;
-	int size = 0;
+	//int size = 0;
 	// node type(4)|prev page(4)|next page(4)|node size(4)
 
 	public BPlusTreeP(String filename, int keyId, Column[] columns) throws IOException {
@@ -46,7 +46,7 @@ public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
 	public void put(Entry key, Row value) throws IOException {
 		if (key == null) throw new IllegalArgumentException("argument key to put() is null");
 		root.put(key, value);
-		size++;
+		//size++;
 		checkRoot();
 	}
 
@@ -66,7 +66,7 @@ public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
 	public void remove(Entry key) throws IOException {
 		if (key == null) throw new IllegalArgumentException("argument key to remove() is null");
 		root.remove(key);
-		size--;
+		//size--;
 		if (root instanceof BPlusTreeInternalNodeP && root.size() == 0) {
 			info.rootPage = ((BPlusTreeInternalNodeP) root).children.get(0);
 			root = page2instance(info.rootPage);
@@ -111,7 +111,7 @@ public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
 		return new BPlusTreeIteratorP(((BPlusTreeInternalNodeP)root).find(key));
 	}
 
-	public int size() {
-		return size;
-	}
+//	public int size() {
+//		return size;
+//	}
 }
