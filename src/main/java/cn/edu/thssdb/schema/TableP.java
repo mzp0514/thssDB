@@ -64,7 +64,7 @@ public class TableP implements Iterable<Row> {
 
 		this.metaFile = new File(this.filePath + this.tableName + ".meta");
 
-		if(metaFile.exists()){
+		if (metaFile.exists()) {
 			this.metaDeserialize();
 		}
 
