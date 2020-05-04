@@ -194,6 +194,7 @@ public class BPlusTreeInfo {
 		os2.writeObject(freePages);
 		os2.writeObject(columns);
 		os2.close();
+		fs2.close();
 	}
 
 	public void read() throws IOException, ClassNotFoundException {

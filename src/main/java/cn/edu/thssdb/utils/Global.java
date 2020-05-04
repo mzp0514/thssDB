@@ -30,4 +30,7 @@ public class Global {
     }
     return s;
   }
+
+  public static int MAX_CACHED_TABLE_NUM = 12;
+
 }

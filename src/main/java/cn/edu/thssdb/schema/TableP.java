@@ -52,7 +52,7 @@ public class TableP implements Iterable<Row> {
 
 		metaSerialize();
 
-		index = new BPlusTreeP(this.filePath + "index", primaryKey, columns);
+		index = new BPlusTreeP(this.filePath + this.tableName + "index", primaryKey, columns);
 	}
 
 	TableP(String databaseName, String tableName) throws IOException, ClassNotFoundException {
@@ -68,7 +68,7 @@ public class TableP implements Iterable<Row> {
 			this.metaDeserialize();
 		}
 
-		index = new BPlusTreeP(this.filePath + "index");
+		index = new BPlusTreeP(this.filePath + this.tableName + "index");
 
 	}
 
@@ -237,11 +237,13 @@ public class TableP implements Iterable<Row> {
 		ObjectOutputStream os1 =  new ObjectOutputStream(fs1);
 		os1.writeObject(this.columns);
 		os1.close();
+		fs1.close();
 	}
 
 	private void metaDeserialize() throws IOException, ClassNotFoundException {
 		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(this.metaFile));
 		this.columns = (ArrayList<Column>) ois.readObject();
+		ois.close();
 	}
 
 	private int getAttrIndex(String attrName){

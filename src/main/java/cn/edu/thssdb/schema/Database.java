@@ -1,19 +1,33 @@
 package cn.edu.thssdb.schema;
 
+import cn.edu.thssdb.exception.*;
 import cn.edu.thssdb.query.QueryResult;
 import cn.edu.thssdb.query.QueryTable;
 
 import cn.edu.thssdb.schema.TableP;
 
-import cn.edu.thssdb.exception.KeyNotExistException;
 
+
+import cn.edu.thssdb.utils.Global;
+
+import java.nio.file.FileSystemException;
 import java.nio.file.NotDirectoryException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.sql.Timestamp;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import java.io.*;
+
+class DBMeta  implements Serializable {
+  public HashSet<String> tableNames;
+  public Timestamp lastModifyTime;
+
+  public DBMeta(HashSet<String> names, Timestamp timestamp)
+  {
+    this.tableNames = names;
+    this.lastModifyTime = timestamp;
+  }
+}
 
 public class Database {
 
@@ -23,6 +37,7 @@ public class Database {
   private HashSet<String> tableNames;
   private File dbDir;
   private File dbMeta;
+  private Timestamp lastModifyTimeStamp;
   ReentrantReadWriteLock lock;
 
   public Database(String name) throws IOException, ClassNotFoundException {
@@ -39,11 +54,13 @@ public class Database {
   // 更新meta文件
   private void persist() throws IOException {
     // TODO
+    DBMeta meta = new DBMeta(this.tableNames, this.lastModifyTimeStamp);
     this.lock.writeLock().lock();
     FileOutputStream fs1 = new FileOutputStream(this.filePath + this.databaseName + ".dbmeta");
     ObjectOutputStream os1 =  new ObjectOutputStream(fs1);
-    os1.writeObject(this.tableNames);
+    os1.writeObject(meta);
     os1.close();
+    fs1.close();
     this.lock.writeLock().unlock();
   }
 
@@ -51,25 +68,42 @@ public class Database {
   // 创建一个新的table，绑定至该数据库。
   public void create(String name, Column[] columns) throws IOException {
     // TODO
+    if (this.tableNames.contains(name))
+      throw new DuplicateKeyException();
     TableP newTb = new TableP(this.databaseName, name, columns);
     this.tableNames.add(name);
-    this.tables.put(name, newTb);
+    addTable(name, newTb);
+    this.lastModifyTimeStamp = new Timestamp(new Date().getTime());
     persist();
   }
 
 
-  public void drop(String name) {
+  public void drop(String tbname) throws IOException {
     // TODO
-    if (!this.tableNames.contains(name))
+    if (!this.tableNames.contains(tbname))
       throw new KeyNotExistException();
-    if (this.tables.containsKey(name))
+    if (this.tables.containsKey(tbname))
     {
-        TableP tb = this.tables.remove(name);
+        TableP tb = this.tables.remove(tbname);
         tb = null;
     }
-
-
-
+    FilenameFilter filter = new FilenameFilter() {
+      @Override
+      public boolean accept(File pathname, String name) {
+        return name.startsWith(tbname);
+      }
+    };
+    File[] files = this.dbDir.listFiles(filter);
+    boolean flag = true;
+    for (File file : files)
+    {
+        flag &= file.delete();
+    }
+    if (!flag)
+      throw new FileDeleteFailedException();
+    this.tableNames.remove(tbname);
+    this.lastModifyTimeStamp = new Timestamp(new Date().getTime());
+    persist();
   }
 
   public String select(QueryTable[] queryTables) {
@@ -85,31 +119,63 @@ public class Database {
     // 数据库存在
     if (this.dbDir.exists() && this.dbDir.isDirectory() && this.dbMeta.exists() && this.dbMeta.isFile())
     {
+      DBMeta meta;
       this.lock.readLock().lock();
       ObjectInputStream ois = new ObjectInputStream(new FileInputStream(this.dbMeta));
-      this.tableNames = (HashSet<String>) ois.readObject();
+      meta = (DBMeta) ois.readObject();
       ois.close();
       this.lock.readLock().unlock();
+      this.tableNames = meta.tableNames;
+      int i = 0;
       for (String tbn : this.tableNames)
       {
         TableP tb = new TableP(this.databaseName, tbn);
         this.tables.put(tbn, tb);
+        i++;
+        if (i == Global.MAX_CACHED_TABLE_NUM)
+          break;
       }
     }
     // 数据库不存在
     else if (!this.dbDir.exists() && !dbMeta.exists())
     {
+      boolean flag = true;
       dbDir.mkdir();
       dbMeta.createNewFile();
+      if (!dbDir.isDirectory() || !dbMeta.isFile())
+          throw new FileCreateFailedException();
     }
     // 文件结构异常
     else
-      throw new NotDirectoryException("Error: invalid file structure");
+      throw new FileStructureException(this.databaseName);
 
 
   }
 
-  public void quit() {
+  public void quit() throws IOException {
     // TODO
+    this.tables.clear();
+    persist();
   }
+
+  private void addTable(String name, TableP tb)
+  {
+    if (this.tables.size() > Global.MAX_CACHED_TABLE_NUM)
+    {
+      for (Map.Entry<String, TableP> e : this.tables.entrySet())
+      {
+        TableP otb = this.tables.remove(e.getKey());
+        otb = null;
+        break;
+      }
+    }
+
+    this.tables.put(name, tb);
+
+  }
+
+  public ArrayList<String> getTableNames() {
+    return new ArrayList<>(this.tableNames);
+  }
+
 }
