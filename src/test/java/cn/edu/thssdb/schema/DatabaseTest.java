@@ -66,6 +66,7 @@ public class DatabaseTest {
         db.create(tbName3, columns);
         db.quit();
         db = null;
+        /*Recover Test*/
         db = new Database(dbName);
         ArrayList<String> tbs = db.getTableNames();
         assertEquals(tbs.size(), 4);

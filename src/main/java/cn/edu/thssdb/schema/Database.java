@@ -85,6 +85,7 @@ public class Database {
     if (this.tables.containsKey(tbname))
     {
         TableP tb = this.tables.remove(tbname);
+        tb.close();
         tb = null;
     }
     FilenameFilter filter = new FilenameFilter() {

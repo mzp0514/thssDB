@@ -72,6 +72,10 @@ public class TableP implements Iterable<Row> {
 
 	}
 
+	public void close() throws IOException {
+		this.index.close();
+	}
+
 	public void insert(Row row) throws IOException {
 		// TODO
 		ArrayList<Entry> entries = row.getEntries();

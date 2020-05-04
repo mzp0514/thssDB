@@ -210,4 +210,8 @@ public class BPlusTreeInfo {
 		ois.close();
 	}
 
+
+	public void close() throws IOException {
+		this.indexFile.close();
+	}
 }

@@ -62,7 +62,7 @@ public class TablePTest {
 			Row row = new Row(entries);
 			table.insert(row);
 		}
-
+		table.close();
 	}
 
 	@Test
@@ -78,6 +78,7 @@ public class TablePTest {
 		}
 
 		assertEquals(res2.toString(), res1.toString());
+		table2.close();
 	}
 
 	@Test
@@ -93,6 +94,7 @@ public class TablePTest {
 		}
 
 		assertEquals(res2.size(), res1.size());
+		table2.close();
 	}
 
 	@Test
@@ -108,6 +110,7 @@ public class TablePTest {
 		}
 
 		assertEquals(res2.toString(), res1.toString());
+		table2.close();
 	}
 
 	@Test
@@ -123,6 +126,7 @@ public class TablePTest {
 		}
 
 		assertEquals(res2.toString(), res1.toString());
+		table2.close();
 	}
 
 	@Test
@@ -138,6 +142,7 @@ public class TablePTest {
 		}
 
 		assertEquals(res2.toString(), res1.toString());
+		table2.close();
 	}
 
 	@Test
@@ -153,6 +158,7 @@ public class TablePTest {
 		}
 
 		assertEquals(res2.toString(), res1.toString());
+		table2.close();
 	}
 
 	@Test
@@ -168,6 +174,7 @@ public class TablePTest {
 		}
 
 		assertEquals(res2.toString(), res1.toString());
+		table2.close();
 	}
 
 	@Test
@@ -183,6 +190,7 @@ public class TablePTest {
 		}
 
 		assertEquals(res2.toString(), res1.toString());
+		table2.close();
 	}
 
 	@Test
@@ -198,6 +206,7 @@ public class TablePTest {
 		}
 
 		assertEquals(res2.toString(), res1.toString());
+		table2.close();
 	}
 
 	@Test
@@ -213,6 +222,7 @@ public class TablePTest {
 		}
 
 		assertEquals(res2.toString(), res1.toString());
+		table2.close();
 	}
 
 	@Test
@@ -228,6 +238,7 @@ public class TablePTest {
 		}
 
 		assertEquals(res2.toString(), res1.toString());
+		table2.close();
 	}
 
 	@Test
@@ -243,6 +254,7 @@ public class TablePTest {
 		}
 
 		assertEquals(res2.toString(), res1.toString());
+		table2.close();
 	}
 
 	@Test
@@ -258,5 +270,6 @@ public class TablePTest {
 		}
 
 		assertEquals(res2.toString(), res1.toString());
+		table2.close();
 	}
 }

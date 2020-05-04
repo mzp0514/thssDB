@@ -33,6 +33,10 @@ public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
 
 	}
 
+	public void close() throws IOException {
+		this.info.close();
+	}
+
 	public Row get(Entry key) throws IOException {
 		if (key == null) throw new IllegalArgumentException("argument key to get() is null");
 		return root.get(key);
