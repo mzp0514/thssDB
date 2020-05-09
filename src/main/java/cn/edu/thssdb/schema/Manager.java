@@ -6,6 +6,7 @@ import cn.edu.thssdb.utils.Global;
 
 import javax.xml.crypto.Data;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -36,17 +37,17 @@ public class Manager {
     this.curDBName = defaultDB;
   }
 
-  private void createDatabaseIfNotExists(String dbName) throws IOException, ClassNotFoundException {
+  public void createDatabaseIfNotExists(String dbName) throws IOException, ClassNotFoundException {
     // TODO
     if (!this.databaseNames.contains(dbName))
     {
-      Database db = new Database(defaultDB);
+      Database db = new Database(dbName);
       this.databaseNames.add(dbName);
       persist();
     }
   }
 
-  private void deleteDatabase(String dbName) throws IOException {
+  public void deleteDatabase(String dbName) throws IOException {
     // TODO
     if (dbName.equals(defaultDB) || dbName.equals(curDBName))
       throw new XDBException("Error: You can not delete the default or current database!");
@@ -72,6 +73,20 @@ public class Manager {
     this.curDB.quit();
     this.curDB = new Database(dbName);
     this.curDBName = dbName;
+  }
+
+
+
+  public String getCurDBName() {
+    return curDBName;
+  }
+
+  public Database getCurDB() {
+    return curDB;
+  }
+
+  public ArrayList<String> getDBNames() {
+    return new ArrayList<>(this.databaseNames);
   }
 
   private static class ManagerHolder {
@@ -100,16 +115,20 @@ public class Manager {
         throw new FileCreateFailedException();
     }
 
-
-    if (this.dbManagerDir.exists() && this.dbManagerDir.isDirectory() && this.dbManagerMeta.exists() && this.dbManagerMeta.isFile()) {
-      this.lock.readLock().lock();
-      ObjectInputStream ois = new ObjectInputStream(new FileInputStream(this.dbManagerMeta));
-      this.databaseNames = (HashSet<String>) ois.readObject();
-      ois.close();
-      this.lock.readLock().unlock();
-    }
     else
-      throw new FileStructureException("DataBaseManager");
+    {
+      if (this.dbManagerDir.exists() && this.dbManagerDir.isDirectory() && this.dbManagerMeta.exists() && this.dbManagerMeta.isFile()) {
+        this.lock.readLock().lock();
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(this.dbManagerMeta));
+        this.databaseNames = (HashSet<String>) ois.readObject();
+        ois.close();
+        this.lock.readLock().unlock();
+      }
+      else
+        throw new FileStructureException("DataBaseManager");
+    }
+
+
 
   }
 
@@ -119,6 +138,7 @@ public class Manager {
     ObjectOutputStream os1 =  new ObjectOutputStream(fs1);
     os1.writeObject(this.databaseNames);
     os1.close();
+    fs1.close();
     this.lock.writeLock().unlock();
   }
 }

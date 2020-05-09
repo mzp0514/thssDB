@@ -49,6 +49,7 @@ public class Database {
     this.dbMeta = new File(this.filePath + this.databaseName + ".dbmeta");
     this.lock = new ReentrantReadWriteLock();
     recover();
+    persist();
   }
 
   // 更新meta文件
@@ -178,5 +179,7 @@ public class Database {
   public ArrayList<String> getTableNames() {
     return new ArrayList<>(this.tableNames);
   }
+
+  public String getDatabaseName() {return databaseName;}
 
 }
