@@ -11,6 +11,8 @@ import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 public class ThssDB {
 
   private static final Logger logger = LoggerFactory.getLogger(ThssDB.class);
@@ -28,6 +30,7 @@ public class ThssDB {
 
   public static void main(String[] args) {
     ThssDB server = ThssDB.getInstance();
+    Manager manager = Manager.getInstance();
     server.start();
   }
 

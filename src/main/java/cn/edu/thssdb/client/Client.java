@@ -1,7 +1,6 @@
 package cn.edu.thssdb.client;
 
-import cn.edu.thssdb.rpc.thrift.GetTimeReq;
-import cn.edu.thssdb.rpc.thrift.IService;
+import cn.edu.thssdb.rpc.thrift.*;
 import cn.edu.thssdb.utils.Global;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -42,6 +41,8 @@ public class Client {
   private static IService.Client client;
   private static CommandLine commandLine;
 
+  private static long sessionID;
+
   public static void main(String[] args) {
     commandLine = parseCmd(args);
     if (commandLine.hasOption(HELP_ARGS)) {
@@ -69,6 +70,26 @@ public class Client {
             open = false;
             break;
           default:
+            String command = msg.trim();
+            if(msg.trim().endsWith(";"))
+            {
+              command = command.substring(0, msg.trim().length() - 1);
+            }
+            command = command.toLowerCase();
+            String prefix = command.split(" ")[0];
+            if (command.startsWith(Global.CONNECT_PREFIX) && command.split(" ").length == 3)
+            {
+                String[] strList = msg.trim().split(" ");
+                String username = strList[1];
+                String password = strList[2];
+                connect(username, password);
+                break;
+            }
+            else if (Global.STATEMENT_PREFIX.contains(prefix))
+            {
+              executeStatement(sessionID, command);
+              break;
+            }
             println("Invalid statements!");
             break;
         }
@@ -91,6 +112,45 @@ public class Client {
     } catch (TException e) {
       logger.error(e.getMessage());
     }
+  }
+
+  private static void connect(String username, String password){
+    ConnectReq req = new ConnectReq(username, password);
+    try {
+      ConnectResp resp = client.connect(req);
+      Status status = resp.getStatus();
+      if (status.code == Global.SUCCESS_CODE)
+      {
+        println(status.getMsg());
+        sessionID = resp.getSessionId();
+      }
+      else
+      {
+        println(status.getMsg());
+      }
+    } catch (TException e) {
+      logger.error(e.getMessage());
+    }
+  }
+
+
+  private static void executeStatement(long sessionID, String statement) {
+    ExecuteStatementReq req = new ExecuteStatementReq(sessionID, statement);
+    try {
+      ExecuteStatementResp resp = client.executeStatement(req);
+      Status status = resp.getStatus();
+      if (status.getCode() == Global.SUCCESS_CODE)
+      {
+        println("Successfully deliver the statement to the server");
+      }
+      else
+      {
+        println(status.getMsg());
+      }
+    } catch (TException e) {
+      logger.error(e.getMessage());
+    }
+
   }
 
   static Options createOptions() {

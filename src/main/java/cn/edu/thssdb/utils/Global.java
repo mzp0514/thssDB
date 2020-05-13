@@ -1,5 +1,8 @@
 package cn.edu.thssdb.utils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class Global {
   public static int fanout = 129;
 
@@ -12,6 +15,10 @@ public class Global {
   public static String CLI_PREFIX = "ThssDB>";
   public static final String SHOW_TIME = "show time;";
   public static final String QUIT = "quit;";
+  public static final String CONNECT_PREFIX = "connect";
+
+  public static final ArrayList<String> STATEMENT_PREFIX = new ArrayList<String>(Arrays.asList("create", "drop", "insert", "delete", "update", "select"));
+
 
   public static int PAGE_SIZE = 4096;
   public static int PAGE_HEADER_SIZE = 16;
