@@ -68,7 +68,7 @@ public class TablePTest {
 	@Test
 	public void selectTest() throws IOException, ClassNotFoundException {
 		TableP table2 = new TableP("dbtest", "tb");
-		ArrayList<Row> res1 = table2.select("id", 100, ComparisonType.EQUAL);
+		ArrayList<Row> res1 = table2.select(0, 100, ComparisonType.EQUAL);
 
 		ArrayList<Row> res2 = new ArrayList<>();
 		for(Row r: rows){
@@ -84,7 +84,7 @@ public class TablePTest {
 	@Test
 	public void selectTest2() throws IOException, ClassNotFoundException {
 		TableP table2 = new TableP("dbtest", "tb");
-		ArrayList<Row> res1 = table2.select("id", 100, ComparisonType.NEQUAL);
+		ArrayList<Row> res1 = table2.select(0, 100, ComparisonType.NEQUAL);
 
 		ArrayList<Row> res2 = new ArrayList<>();
 		for(Row r: rows){
@@ -100,7 +100,7 @@ public class TablePTest {
 	@Test
 	public void selectTest3() throws IOException, ClassNotFoundException {
 		TableP table2 = new TableP("dbtest", "tb");
-		ArrayList<Row> res1 = table2.select("id", 200, ComparisonType.GREATER);
+		ArrayList<Row> res1 = table2.select(0, 200, ComparisonType.GREATER);
 
 		ArrayList<Row> res2 = new ArrayList<>();
 		for(Row r: rows){
@@ -116,7 +116,7 @@ public class TablePTest {
 	@Test
 	public void selectTest4() throws IOException, ClassNotFoundException {
 		TableP table2 = new TableP("dbtest", "tb");
-		ArrayList<Row> res1 = table2.select("id", 50, ComparisonType.LESS);
+		ArrayList<Row> res1 = table2.select(0, 50, ComparisonType.LESS);
 
 		ArrayList<Row> res2 = new ArrayList<>();
 		for(Row r: rows){
@@ -132,7 +132,7 @@ public class TablePTest {
 	@Test
 	public void selectTest5() throws IOException, ClassNotFoundException {
 		TableP table2 = new TableP("dbtest", "tb");
-		ArrayList<Row> res1 = table2.select("id", 50, ComparisonType.NLESS);
+		ArrayList<Row> res1 = table2.select(0, 50, ComparisonType.NLESS);
 
 		ArrayList<Row> res2 = new ArrayList<>();
 		for(Row r: rows){
@@ -148,7 +148,7 @@ public class TablePTest {
 	@Test
 	public void selectTest6() throws IOException, ClassNotFoundException {
 		TableP table2 = new TableP("dbtest", "tb");
-		ArrayList<Row> res1 = table2.select("id", 50, ComparisonType.NGREATER);
+		ArrayList<Row> res1 = table2.select(0, 50, ComparisonType.NGREATER);
 
 		ArrayList<Row> res2 = new ArrayList<>();
 		for(Row r: rows){
@@ -164,7 +164,7 @@ public class TablePTest {
 	@Test
 	public void selectTest7() throws IOException, ClassNotFoundException {
 		TableP table2 = new TableP("dbtest", "tb");
-		ArrayList<Row> res1 = table2.select("name", "mzpp", ComparisonType.NGREATER);
+		ArrayList<Row> res1 = table2.select(1, "mzpp", ComparisonType.NGREATER);
 
 		ArrayList<Row> res2 = new ArrayList<>();
 		for(Row r: rows){
@@ -180,7 +180,7 @@ public class TablePTest {
 	@Test
 	public void selectTest8() throws IOException, ClassNotFoundException {
 		TableP table2 = new TableP("dbtest", "tb");
-		ArrayList<Row> res1 = table2.select("height", 100.0, ComparisonType.NGREATER);
+		ArrayList<Row> res1 = table2.select(3, 100.0, ComparisonType.NGREATER);
 
 		ArrayList<Row> res2 = new ArrayList<>();
 		for(Row r: rows){
@@ -196,7 +196,7 @@ public class TablePTest {
 	@Test
 	public void selectTest9() throws IOException, ClassNotFoundException {
 		TableP table2 = new TableP("dbtest", "tb");
-		ArrayList<Row> res1 = table2.select("height", 100.0, ComparisonType.EQUAL);
+		ArrayList<Row> res1 = table2.select(3, 100.0, ComparisonType.EQUAL);
 
 		ArrayList<Row> res2 = new ArrayList<>();
 		for(Row r: rows){
@@ -212,7 +212,7 @@ public class TablePTest {
 	@Test
 	public void selectTest10() throws IOException, ClassNotFoundException {
 		TableP table2 = new TableP("dbtest", "tb");
-		ArrayList<Row> res1 = table2.select("height", 100.0, ComparisonType.NEQUAL);
+		ArrayList<Row> res1 = table2.select(3, 100.0, ComparisonType.NEQUAL);
 
 		ArrayList<Row> res2 = new ArrayList<>();
 		for(Row r: rows){
@@ -228,7 +228,7 @@ public class TablePTest {
 	@Test
 	public void selectTest11() throws IOException, ClassNotFoundException {
 		TableP table2 = new TableP("dbtest", "tb");
-		ArrayList<Row> res1 = table2.select("height", 100.0, ComparisonType.GREATER);
+		ArrayList<Row> res1 = table2.select(3, 100.0, ComparisonType.GREATER);
 
 		ArrayList<Row> res2 = new ArrayList<>();
 		for(Row r: rows){
@@ -244,7 +244,7 @@ public class TablePTest {
 	@Test
 	public void selectTest12() throws IOException, ClassNotFoundException {
 		TableP table2 = new TableP("dbtest", "tb");
-		ArrayList<Row> res1 = table2.select("height", 100.0, ComparisonType.LESS);
+		ArrayList<Row> res1 = table2.select(3, 100.0, ComparisonType.LESS);
 
 		ArrayList<Row> res2 = new ArrayList<>();
 		for(Row r: rows){
@@ -260,7 +260,7 @@ public class TablePTest {
 	@Test
 	public void selectTest13() throws IOException, ClassNotFoundException {
 		TableP table2 = new TableP("dbtest", "tb");
-		ArrayList<Row> res1 = table2.select("height", 100.0, ComparisonType.NLESS);
+		ArrayList<Row> res1 = table2.select(3, 100.0, ComparisonType.NLESS);
 
 		ArrayList<Row> res2 = new ArrayList<>();
 		for(Row r: rows){

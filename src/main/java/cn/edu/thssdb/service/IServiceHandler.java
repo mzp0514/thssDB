@@ -16,6 +16,7 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class IServiceHandler implements IService.Iface {
@@ -72,8 +73,18 @@ public class IServiceHandler implements IService.Iface {
     {
       String statement = req.getStatement();
       logger.info("Statement: " + statement + " received, ready to parse");
+
+
       status.setCode(Global.SUCCESS_CODE);
       resp.setStatus(status);
+      resp.setHasResult(true);
+      resp.addToColumnsList("A");
+      resp.addToColumnsList("B");
+      ArrayList<String> a = new ArrayList<>();
+      a.add("1");
+      a.add("2");
+      resp.addToRowList(a);
+
     }
     else
     {

@@ -2,16 +2,10 @@ package cn.edu.thssdb.schema;
 
 import cn.edu.thssdb.exception.*;
 import cn.edu.thssdb.query.QueryResult;
-import cn.edu.thssdb.query.QueryTable;
-
-import cn.edu.thssdb.schema.TableP;
-
 
 
 import cn.edu.thssdb.utils.Global;
 
-import java.nio.file.FileSystemException;
-import java.nio.file.NotDirectoryException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -108,11 +102,11 @@ public class Database {
     persist();
   }
 
-  public String select(QueryTable[] queryTables) {
-    // TODO
-    QueryResult queryResult = new QueryResult(queryTables);
-    return null;
-  }
+//  public String select(QueryTable[] queryTables) {
+//    // TODO
+//    QueryResult queryResult = new QueryResult(queryTables);
+//    return null;
+//  }
 
   // 根据name来恢复数据库，若没有，则创建新数据库。
   private void recover() throws IOException, ClassNotFoundException {

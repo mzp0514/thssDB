@@ -142,6 +142,21 @@ public class Client {
       if (status.getCode() == Global.SUCCESS_CODE)
       {
         println("Successfully deliver the statement to the server");
+        if(resp.isHasResult()){
+          println("Execution success");
+          if(resp.isSetColumnsList()) {
+            println(String.join("|", resp.columnsList));
+          }
+          if(resp.isSetRowList()){
+            for(int i = 0; i < resp.rowList.size(); i++){
+              println(String.join("|", resp.rowList.get(i)));
+            }
+          }
+        }
+        else{
+          println("Execution error");
+        }
+
       }
       else
       {

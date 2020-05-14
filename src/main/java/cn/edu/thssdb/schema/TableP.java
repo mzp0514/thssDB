@@ -55,7 +55,7 @@ public class TableP implements Iterable<Row> {
 		index = new BPlusTreeP(this.filePath + this.tableName + "index", primaryKey, columns);
 	}
 
-	TableP(String databaseName, String tableName) throws IOException, ClassNotFoundException {
+	public TableP(String databaseName, String tableName) throws IOException, ClassNotFoundException {
 
 		this.databaseName = new String(databaseName);
 		this.tableName = new String(tableName);
@@ -115,10 +115,55 @@ public class TableP implements Iterable<Row> {
 		}
 	}
 
-	public ArrayList<Row> select(String attrName, Object attrValue, ComparisonType comp) throws IOException {
-		ArrayList<Row> res = new ArrayList<>();
 
-		int attrId = this.getAttrIndex(attrName);
+	public ArrayList<Row> match(ArrayList<Integer> attrs, ArrayList<Object> vals) throws IOException {
+		ArrayList<Row> res = new ArrayList<>();
+		BPlusTreeIteratorP it = index.iterator();
+		int pri_idx = attrs.indexOf(primaryKey);
+		if(pri_idx != -1){
+			try {
+				Row r = this.index.get((Entry) vals.get(pri_idx));
+				if (attrs.size() > 1) {
+					Boolean matched = true;
+					for (int i = 0; i < attrs.size(); i++) {
+						matched = (r.getEntries().get(attrs.get(i)).equals((Comparable) vals.get(i)));
+						if (!matched) {
+							break;
+						}
+					}
+					if (matched) {
+						res.add(r);
+					}
+				} else {
+					res.add(r);
+				}
+			}
+			catch (Exception e){
+
+			}
+		}
+		else {
+			while (it.hasNext()) {
+				Row temp = it.next().getValue();
+				Boolean matched = true;
+				for (int i = 0; i < attrs.size(); i++) {
+
+					matched = (temp.getEntries().get(attrs.get(i)).equals((Comparable) vals.get(i)));
+
+					if (!matched) {
+						break;
+					}
+				}
+				if (matched) {
+					res.add(temp);
+				}
+			}
+		}
+		return res;
+	}
+
+	public ArrayList<Row> select(int attrId, Object attrValue, ComparisonType comp) throws IOException {
+		ArrayList<Row> res = new ArrayList<>();
 
 		Entry entry = new Entry((Comparable) attrValue);
 
@@ -250,12 +295,18 @@ public class TableP implements Iterable<Row> {
 		ois.close();
 	}
 
-	private int getAttrIndex(String attrName){
+	public int getAttrIndex(String attrName){
 		int attrId = 0;
+
 		while(!this.columns.get(attrId).getName().equals(attrName)){
 			attrId ++;
 		}
-		return attrId;
+		if(attrId < columns.size()) {
+			return attrId;
+		}
+		else {
+			return -1;
+		}
 	}
 
 	private class TableIterator implements Iterator<Row> {
