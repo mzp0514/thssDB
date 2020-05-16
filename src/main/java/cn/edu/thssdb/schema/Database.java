@@ -176,4 +176,6 @@ public class Database {
 
   public String getDatabaseName() {return databaseName;}
 
+  public boolean tableInDB(String tbName) {return this.tableNames.contains(tbName);}
+
 }

@@ -30,9 +30,18 @@ public class QueryResult {
   private ArrayList<Integer> index_s;
   private ArrayList<String> attrs_s;
 
+  private String msg;
+  public boolean isReturnValue;
+
+  public QueryResult(String msg) {
+    this.msg = msg;
+    this.isReturnValue = false;
+  }
+
   public QueryResult(List<TableP> queryTables, List<String> select_columns,
                      String attr1, String attr2, JoinType type, boolean allAttr) {
     // TODO
+    msg = "";
     index = new ArrayList<>();
     duplicate = new ArrayList<>();
     attrs = new ArrayList<>();
@@ -92,6 +101,7 @@ public class QueryResult {
   }
 
   public QueryResult(TableP queryTable, List<String> select_columns, boolean allAttr){
+    msg = "";
     this.queryTable = queryTable;
     index_s = new ArrayList<>();
     attrs_s = new ArrayList<>();
@@ -250,5 +260,7 @@ public class QueryResult {
     res.appendEntries(entries);
     return res;
   }
+
+  public String getMsg() {return this.msg;}
 
 }

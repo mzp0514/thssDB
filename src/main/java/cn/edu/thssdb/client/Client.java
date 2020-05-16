@@ -153,8 +153,9 @@ public class Client {
             }
           }
         }
-        else{
-          println("Execution error");
+        else if (!resp.isHasResult())
+        {
+          println(status.msg);
         }
 
       }
