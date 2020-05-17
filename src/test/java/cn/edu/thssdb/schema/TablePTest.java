@@ -48,14 +48,14 @@ public class TablePTest {
 	}
 
 	@Test
-	public void insertTest() throws IOException {
+	public void insertTest() throws IOException, ClassNotFoundException {
 		this.table = new TableP("dbtest", "tb", columns);
 		Entry[] entries = new Entry[5];
 		entries[0] = new Entry(0);
 		entries[1] = new Entry("mzp");
 		entries[2] = new Entry("73");
 
-		for(int i = 0; i < 1000; i++){
+		for(int i = 0; i < 10; i++){
 			entries[0] = new Entry(i);
 			entries[3] = new Entry((double)i);
 			entries[4] = new Entry((double)i);
@@ -63,6 +63,45 @@ public class TablePTest {
 			table.insert(row);
 		}
 		table.close();
+
+		this.table = new TableP("dbtest", "tb");
+		entries = new Entry[5];
+		entries[0] = new Entry(0);
+		entries[1] = new Entry("mzp");
+		entries[2] = new Entry("73");
+
+		for(int i = 11; i < 20; i++){
+			entries[0] = new Entry(i);
+			entries[3] = new Entry((double)i);
+			entries[4] = new Entry((double)i);
+			Row row = new Row(entries);
+			table.insert(row);
+		}
+	}
+
+
+
+	@Test
+	public void insertTest2() throws IOException, ClassNotFoundException {
+		Entry[] entries;
+
+		this.table = new TableP("dbtest", "tb");
+		entries = new Entry[5];
+		entries[0] = new Entry(0);
+		entries[1] = new Entry("mzp");
+		entries[2] = new Entry("73");
+		entries[3] = new Entry((double)0);
+		entries[4] = new Entry((double)0);
+		Row row = new Row(entries);
+		table.insert(row);
+
+//		for(int i = 11; i < 20; i++){
+//			entries[0] = new Entry(i);
+//			entries[3] = new Entry((double)i);
+//			entries[4] = new Entry((double)i);
+//			Row row = new Row(entries);
+//			table.insert(row);
+//		}
 	}
 
 	@Test

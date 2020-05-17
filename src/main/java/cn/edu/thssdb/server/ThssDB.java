@@ -29,6 +29,15 @@ public class ThssDB {
   }
 
   public static void main(String[] args) {
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      Manager manager = Manager.getInstance();
+      try {
+        manager.close();
+        logger.info("Closing all tables");
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }));
     ThssDB server = ThssDB.getInstance();
     Manager manager = Manager.getInstance();
     server.start();

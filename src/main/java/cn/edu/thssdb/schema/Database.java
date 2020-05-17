@@ -60,6 +60,19 @@ public class Database {
   }
 
 
+  public TableP getTable(String tableName) throws IOException, ClassNotFoundException {
+    if (!tableInDB(tableName))
+      return null;
+    if (this.tables.containsKey(tableName))
+      return this.tables.get(tableName);
+    else
+    {
+      TableP tb = new TableP(this.databaseName, tableName);
+      this.addTable(tableName, tb);
+      return this.tables.get(tableName);
+    }
+  }
+
   // 创建一个新的table，绑定至该数据库。
   public void create(String name, Column[] columns) throws IOException {
     // TODO
@@ -150,17 +163,19 @@ public class Database {
 
   public void quit() throws IOException {
     // TODO
+    for (TableP tb : this.tables.values())
+      tb.close();
     this.tables.clear();
     persist();
   }
 
-  private void addTable(String name, TableP tb)
-  {
+  private void addTable(String name, TableP tb) throws IOException {
     if (this.tables.size() > Global.MAX_CACHED_TABLE_NUM)
     {
       for (Map.Entry<String, TableP> e : this.tables.entrySet())
       {
         TableP otb = this.tables.remove(e.getKey());
+        otb.close();
         otb = null;
         break;
       }

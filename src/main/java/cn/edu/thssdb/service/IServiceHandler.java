@@ -95,7 +95,11 @@ public class IServiceHandler implements IService.Iface {
         SQLVisitorStatement visitor = new SQLVisitorStatement(manager.getCurDB(), sessionID);
         res = visitor.visit(stmt);
       } catch (Exception e) {
-        logger.info(e.getMessage());
+        status.setCode(Global.FAILURE_CODE);
+        status.setMsg(e.getMessage());
+        resp.setStatus(status);
+        resp.setHasResult(false);
+        return resp;
       }
       status.setCode(Global.SUCCESS_CODE);
       if (res.isReturnValue)

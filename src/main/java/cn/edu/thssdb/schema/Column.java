@@ -31,6 +31,8 @@ public class Column implements Comparable<Column>, Serializable {
     return primary == 1;
   }
 
+  public boolean isNotNull() {return notNull;}
+
   @Override
   public int compareTo(Column e) {
     return name.compareTo(e.name);

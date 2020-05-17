@@ -184,4 +184,10 @@ public class Manager {
     fs1.close();
     this.lock.writeLock().unlock();
   }
+
+  public void close() throws IOException {
+    this.curDB.quit();
+  }
 }
+
+

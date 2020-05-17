@@ -151,8 +151,11 @@ public class BPlusTreeInfo {
 	}
 
 	Object readIndex(ColumnType type, long pos, int stringMaxLen) throws IOException {
+		//indexFile.seek(0);
+
 		if(pos != -1)
 			indexFile.seek(pos);
+
 
 		Object a = null;
 

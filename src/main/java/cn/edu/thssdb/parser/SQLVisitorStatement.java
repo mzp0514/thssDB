@@ -1,8 +1,7 @@
 package cn.edu.thssdb.parser;
 
 import cn.edu.thssdb.query.QueryResult;
-import cn.edu.thssdb.schema.Column;
-import cn.edu.thssdb.schema.Database;
+import cn.edu.thssdb.schema.*;
 import cn.edu.thssdb.type.ColumnType;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -10,10 +9,14 @@ import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import javax.xml.crypto.Data;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.rmi.server.ExportException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
@@ -92,22 +95,22 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
             if (column.type_name().T_INT() != null)
             {
                 fieldTypes.add(ColumnType.INT);
-                maxLength.add(4);
+                maxLength.add(0);
             }
             else if (column.type_name().T_LONG() != null)
             {
                 fieldTypes.add(ColumnType.LONG);
-                maxLength.add(8);
+                maxLength.add(0);
             }
             else if (column.type_name().T_DOUBLE() != null)
             {
                 fieldTypes.add(ColumnType.DOUBLE);
-                maxLength.add(8);
+                maxLength.add(0);
             }
             else if (column.type_name().T_FLOAT() != null)
             {
                 fieldTypes.add(ColumnType.FLOAT);
-                maxLength.add(4);
+                maxLength.add(0);
             }
             else if (column.type_name().T_STRING() != null)
             {
@@ -217,7 +220,20 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
     @Override
     public QueryResult visitDrop_table_stmt(SQLParser.Drop_table_stmtContext ctx) {
-        return null;
+        String tableName = ctx.table_name().getText().toLowerCase();
+        if (this.db.tableInDB(tableName))
+        {
+            try{
+                this.db.drop(tableName);
+            } catch (IOException e) {
+                return new QueryResult("Drop Failed, internal IO Error");
+            }
+            return new QueryResult(String.format("Drop table %s successfully", tableName));
+        }
+        else
+        {
+            return new QueryResult(String.format("Drop Error: Unknown table name %s", tableName));
+        }
     }
 
     @Override
@@ -237,7 +253,107 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
     @Override
     public QueryResult visitInsert_stmt(SQLParser.Insert_stmtContext ctx) {
-        return null;
+        String tableName = ctx.table_name().getText().toLowerCase();
+        if (this.db.tableInDB(tableName))
+        {
+            TableP table;
+            try {
+                table = this.db.getTable(tableName);
+                List<SQLParser.Column_nameContext> colsToInsert = ctx.column_name();
+                List<SQLParser.Value_entryContext> rowsToInsert = ctx.value_entry();
+                HashSet<String> colNameSet = ctx.column_name().stream().map(x -> x.IDENTIFIER().getText().toLowerCase()).collect(Collectors.toCollection(HashSet::new));
+                int[] insertOrder = new int[table.columns.size()];
+                ArrayList<Column> allCol = table.columns;
+                ArrayList<String> allColNames = table.columns.stream().map(Column::getName).collect(Collectors.toCollection(ArrayList::new));
+                for (int i = 0; i < insertOrder.length; i++)
+                    insertOrder[i] = i;
+
+                if (rowsToInsert.size() == 0)
+                    return new QueryResult("Insert Error: No Entrys!");
+
+                // 自定义插入顺序
+                if (colNameSet.size() != 0)
+                {
+                    // 检查重复
+                    if (colNameSet.size() != ctx.column_name().size())
+                        return new QueryResult("Insert Error: Duplicate Column Names!");
+
+                    // 检查缺失的列，以及判断缺失的列是否为not null或主键
+                    for (int i = 0; i < allCol.size(); i++)
+                    {
+                        Column col = allCol.get(i);
+                        if (!colNameSet.contains(col.getName()))
+                        {
+                            if (allCol.get(i).isPrimary() || col.isNotNull())
+                                return new QueryResult(String.format("Insert Error: Field %s can not be null", col.getName()));
+                            insertOrder[i] = -1;
+                        }
+                    }
+
+                    // 重组插入顺序
+                    for (int i = 0; i < colsToInsert.size(); i++)
+                    {
+                        SQLParser.Column_nameContext col = colsToInsert.get(i);
+                        int index = allColNames.indexOf(col.getText().toLowerCase());
+                        if (index < 0)
+                            return new QueryResult(String.format("Insert Error: Unknown Filed %s", col.getText()));
+                        insertOrder[index] = i;
+                    }
+
+                }
+
+                for (SQLParser.Value_entryContext row : rowsToInsert)
+                {
+                    List<SQLParser.Literal_valueContext> entriesToInsert = row.literal_value();
+                    if (colsToInsert.size() == 0 && entriesToInsert.size() != allCol.size())
+                        return new QueryResult("Insert Error: Entries Size and Col Size don't match");
+                    else if (colsToInsert.size() != 0 && entriesToInsert.size() != colsToInsert.size())
+                        return new QueryResult("Insert Error: Entries Size and Col Size don't match");
+                    Entry[] entries = new Entry[allCol.size()];
+                    for (int i = 0; i < insertOrder.length; i++)
+                    {
+                        if (insertOrder[i] == -1)
+                        {
+                            entries[i] = new Entry(null);
+                        }
+                        else
+                        {
+                            SQLParser.Literal_valueContext entry = entriesToInsert.get(insertOrder[i]);
+                            String text = entry.getText();
+                            switch (allCol.get(i).getType()) {
+                                case INT:
+                                    entries[i] = new Entry(Integer.valueOf(text));
+                                    break;
+                                case FLOAT:
+                                    entries[i] = new Entry(Float.valueOf(text));
+                                    break;
+                                case LONG:
+                                    entries[i] = new Entry(Long.valueOf(text));
+                                    break;
+                                case DOUBLE:
+                                    entries[i] = new Entry(Double.valueOf(text));
+                                    break;
+                                case STRING:
+                                    text = text.substring(1, text.length() - 1);
+                                    entries[i] = new Entry(text);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    Row r = new Row(entries);
+                    table.insert(r);
+                }
+                return new QueryResult(String.format("Insert %d row(s) successfully", rowsToInsert.size()));
+
+            } catch (Exception e) {
+                return new QueryResult("Insert Failed: " + e.getMessage());
+            }
+
+        }
+        else
+            return new QueryResult(String.format("Insert Failed, Unknown table name: %s", tableName));
     }
 
     @Override
