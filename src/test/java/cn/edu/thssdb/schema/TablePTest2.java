@@ -46,6 +46,8 @@ public class TablePTest2 {
         table.close();
     }
 
+
+    // 这个测试应该不能通过
     @Test
     public void insertTest2() throws IOException, ClassNotFoundException {
         this.table = new TableP("dbtest", "tb");
