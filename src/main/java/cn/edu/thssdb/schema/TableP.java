@@ -79,7 +79,9 @@ public class TableP implements Iterable<Row> {
 	public void insert(Row row) throws IOException {
 		// TODO
 		ArrayList<Entry> entries = row.getEntries();
+
 		this.index.put(entries.get(this.primaryKey), row);
+
 	}
 
 	public void delete(Row row) throws IOException{
@@ -285,6 +287,7 @@ public class TableP implements Iterable<Row> {
 		FileOutputStream fs1 = new FileOutputStream(this.filePath + this.tableName + ".meta");
 		ObjectOutputStream os1 =  new ObjectOutputStream(fs1);
 		os1.writeObject(this.columns);
+		os1.writeInt(this.primaryKey);
 		os1.close();
 		fs1.close();
 	}
@@ -292,6 +295,7 @@ public class TableP implements Iterable<Row> {
 	private void metaDeserialize() throws IOException, ClassNotFoundException {
 		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(this.metaFile));
 		this.columns = (ArrayList<Column>) ois.readObject();
+		this.primaryKey = ois.readInt();
 		ois.close();
 	}
 

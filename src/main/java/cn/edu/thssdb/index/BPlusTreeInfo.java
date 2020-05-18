@@ -40,6 +40,7 @@ public class BPlusTreeInfo {
 					throws IOException {
 
 		this.columns = columns;
+		this.keyId = keyId;
 		this.keyType = columns[keyId].getType();
 
 		headerFile = new File(filename + ".header");
