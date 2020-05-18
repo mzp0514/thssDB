@@ -65,13 +65,15 @@ abstract class BPlusTreeNodeP{
 	}
 
 	BPlusTreeNodeP page2instance(int page) throws IOException {
-		int type = info.readNodeType(page);
-		BPlusTreeNodeP child;
-		if(type == BPlusNodeType.LEAF.ordinal()){
-			child = new BPlusTreeLeafNodeP(page, info);
-		}
-		else{
-			child = new BPlusTreeInternalNodeP(page, info);
+		BPlusTreeNodeP child = info.cache.get(page);
+
+		if (child == null) {
+			int type = info.readNodeType(page);
+			if (type == BPlusNodeType.LEAF.ordinal()) {
+				child = new BPlusTreeLeafNodeP(page, info);
+			} else {
+				child = new BPlusTreeInternalNodeP(page, info);
+			}
 		}
 		return child;
 	}

@@ -20,8 +20,9 @@ public final class BPlusTreeInternalNodeP extends BPlusTreeNodeP {
 		this.nodeType = BPlusNodeType.INTERNAL.ordinal();
 		keys = new ArrayList<>(Collections.nCopies((int) (1.5 * info.internalDataMaxLen), null));
 		children = new ArrayList<>(Collections.nCopies((int) (1.5 * info.internalDataMaxLen + 1), -1));
-		write();
+//		write();
 		nodeSize = size;
+		info.cache.put(pageId, this);
 	}
 
 	BPlusTreeInternalNodeP(int pageId, BPlusTreeInfo info) throws IOException {
@@ -31,6 +32,7 @@ public final class BPlusTreeInternalNodeP extends BPlusTreeNodeP {
 		keys = new ArrayList<>(Collections.nCopies((int) (1.5 * info.internalDataMaxLen), null));
 		children = new ArrayList<>(Collections.nCopies((int) (1.5 * info.internalDataMaxLen + 1), -1));
 		read();
+		info.cache.put(pageId, this);
 	}
 
 	@Override
@@ -120,8 +122,8 @@ public final class BPlusTreeInternalNodeP extends BPlusTreeNodeP {
 			Pair<Integer, Entry> newSiblingNode = child.split();
 			insertChild(newSiblingNode.getValue(), newSiblingNode.getKey());
 		}
-		child.write();
-		write();
+//		child.write();
+//		write();
 	}
 
 	@Override
@@ -129,14 +131,15 @@ public final class BPlusTreeInternalNodeP extends BPlusTreeNodeP {
 		int index = binarySearch(key);
 		int childIndex = index >= 0 ? index + 1 : -index - 1;
 		int childPage = children.get(childIndex);
-		int type = info.readNodeType(childPage);
-		BPlusTreeNodeP child;
-		if(type == BPlusNodeType.LEAF.ordinal()){
-			child = new BPlusTreeLeafNodeP(childPage, info);
-		}
-		else{
-			child = new BPlusTreeInternalNodeP(childPage, info);
-		}
+
+//		int type = info.readNodeType(childPage);
+		BPlusTreeNodeP child = page2instance(childPage);
+//		if(type == BPlusNodeType.LEAF.ordinal()){
+//			child = new BPlusTreeLeafNodeP(childPage, info);
+//		}
+//		else{
+//			child = new BPlusTreeInternalNodeP(childPage, info);
+//		}
 
 		child.remove(key);
 		if (child.isUnderFlow()) {
@@ -157,14 +160,14 @@ public final class BPlusTreeInternalNodeP extends BPlusTreeNodeP {
 				Pair<Integer, Entry> newSiblingNode = left.split();
 				insertChild(newSiblingNode.getValue(), newSiblingNode.getKey());
 			}
-			left.write();
-			right.write();
+//			left.write();
+//			right.write();
 		}
 		else if (index >= 0) {
 			keys.set(index, page2instance(children.get(index + 1)).getFirstLeafKey());
 		}
-		write();
-		child.write();
+//		write();
+//		child.write();
 	}
 
 	@Override
@@ -178,7 +181,11 @@ public final class BPlusTreeInternalNodeP extends BPlusTreeNodeP {
 	Pair<Integer, Entry> split() throws IOException {
 		int from = size() / 2 + 1;
 		int to = size();
-		BPlusTreeInternalNodeP newSiblingNode = new BPlusTreeInternalNodeP(info, to - from);
+		BPlusTreeInternalNodeP newSiblingNode = (BPlusTreeInternalNodeP) info.cache.get(to - from);
+		if(newSiblingNode == null){
+			newSiblingNode = new BPlusTreeInternalNodeP(info, to - from);
+			//info.cache.put(to - from, newSiblingNode);
+		}
 		for (int i = 0; i < to - from; i++) {
 			newSiblingNode.keys.set(i, keys.get(i + from));
 			newSiblingNode.children.set(i, children.get(i + from));
@@ -197,14 +204,12 @@ public final class BPlusTreeInternalNodeP extends BPlusTreeNodeP {
 		for (int i = 0; i < length; i++) {
 			keys.set(i + index + 1, node.keys.get(i));
 			children.set(i + index + 1, node.children.get(i));
-//			node.keys.set(i, null);
-//			node.children.set(i, -1);
 		}
-//		node.nodeSize = 0;
+
 		children.set(length + index + 1, node.children.get(length));
 		nodeSize = index + length + 1;
 		info.freePages.add(node.pageId);
-		info.write();
+//		info.write();
 	}
 
 	@Override
@@ -241,7 +246,7 @@ public final class BPlusTreeInternalNodeP extends BPlusTreeNodeP {
 			childrenAdd(childIndex + 1, child);
 			keysAdd(childIndex, key);
 		}
-		write();
+//		write();
 	}
 
 	private void deleteChild(Entry key) throws IOException {
@@ -249,7 +254,7 @@ public final class BPlusTreeInternalNodeP extends BPlusTreeNodeP {
 		if (index >= 0) {
 			childrenRemove(index + 1);
 			keysRemove(index);
-			write();
+//			write();
 		}
 	}
 

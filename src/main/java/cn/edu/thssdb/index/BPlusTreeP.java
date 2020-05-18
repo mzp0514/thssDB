@@ -18,22 +18,26 @@ public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
 	public BPlusTreeP(String filename, int keyId, Column[] columns) throws IOException {
 		info = new BPlusTreeInfo(filename, keyId, columns, columns[keyId].getMaxLength());
 		root = new BPlusTreeLeafNodeP(info, 0);
+		//info.cache.put(root.pageId, root);
 	}
 
 	public BPlusTreeP(String filename) throws IOException, ClassNotFoundException {
 		info = new BPlusTreeInfo(filename);
-		int type = info.readNodeType(info.rootPage);
-
-		if(type == BPlusNodeType.LEAF.ordinal()){
-			root = new BPlusTreeLeafNodeP(info.rootPage, info);
-		}
-		else{
-			root = new BPlusTreeInternalNodeP(info.rootPage, info);
-		}
+		root = page2instance(info.rootPage);
+//		int type = info.readNodeType(info.rootPage);
+////
+////		if(type == BPlusNodeType.LEAF.ordinal()){
+////			root = new BPlusTreeLeafNodeP(info.rootPage, info);
+////		}
+////		else{
+////			root = new BPlusTreeInternalNodeP(info.rootPage, info);
+////		}
 
 	}
 
 	public void close() throws IOException {
+		this.info.write();
+		this.info.writeCache();
 		this.info.close();
 	}
 
@@ -55,13 +59,15 @@ public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
 	}
 
 	BPlusTreeNodeP page2instance(int page) throws IOException {
-		int type = info.readNodeType(page);
-		BPlusTreeNodeP child;
-		if(type == BPlusNodeType.LEAF.ordinal()){
-			child = new BPlusTreeLeafNodeP(page, info);
-		}
-		else{
-			child = new BPlusTreeInternalNodeP(page, info);
+		BPlusTreeNodeP child = info.cache.get(page);
+		if(child == null) {
+			int type = info.readNodeType(page);
+			if (type == BPlusNodeType.LEAF.ordinal()) {
+				child = new BPlusTreeLeafNodeP(page, info);
+			} else {
+				child = new BPlusTreeInternalNodeP(page, info);
+			}
+			//info.cache.put(page, child);
 		}
 		return child;
 	}
@@ -90,11 +96,12 @@ public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
 			newRoot.keys.set(0, newSiblingNode.getValue());
 			newRoot.children.set(0, info.rootPage);
 			newRoot.children.set(1, newSiblingNode.getKey());
-			newRoot.write();
-			root.write();
+			//newRoot.write();
+			//root.write();
 			root = newRoot;
+			//info.cache.put(newRoot.pageId, newRoot);
 			info.rootPage = newRoot.pageId;
-			info.write();
+			// info.write();
 		}
 	}
 

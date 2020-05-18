@@ -55,7 +55,7 @@ public class TablePTest {
 		entries[1] = new Entry("mzp");
 		entries[2] = new Entry("73");
 
-		for(int i = 0; i < 10; i++){
+		for(int i = 0; i < 10000; i++){
 			entries[0] = new Entry(i);
 			entries[3] = new Entry((double)i);
 			entries[4] = new Entry((double)i);
@@ -64,19 +64,19 @@ public class TablePTest {
 		}
 		table.close();
 
-		this.table = new TableP("dbtest", "tb");
-		entries = new Entry[5];
-		entries[0] = new Entry(0);
-		entries[1] = new Entry("mzp");
-		entries[2] = new Entry("73");
-
-		for(int i = 11; i < 20; i++){
-			entries[0] = new Entry(i);
-			entries[3] = new Entry((double)i);
-			entries[4] = new Entry((double)i);
-			Row row = new Row(entries);
-			table.insert(row);
-		}
+//		this.table = new TableP("dbtest", "tb");
+//		entries = new Entry[5];
+//		entries[0] = new Entry(0);
+//		entries[1] = new Entry("mzp");
+//		entries[2] = new Entry("73");
+//
+//		for(int i = 11; i < 20; i++){
+//			entries[0] = new Entry(i);
+//			entries[3] = new Entry((double)i);
+//			entries[4] = new Entry((double)i);
+//			Row row = new Row(entries);
+//			table.insert(row);
+//		}
 	}
 
 

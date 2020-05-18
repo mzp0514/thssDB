@@ -10,6 +10,8 @@ import javafx.util.Pair;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class BPlusTreeInfo {
@@ -20,6 +22,7 @@ public class BPlusTreeInfo {
 	int rootPage;
 
 	LinkedList<Integer> freePages;
+	HashMap<Integer, BPlusTreeNodeP> cache;
 
 	int pageNum;
 	ColumnType keyType;
@@ -32,6 +35,7 @@ public class BPlusTreeInfo {
 	BPlusTreeInfo(String filename) throws IOException, ClassNotFoundException {
 		headerFile = new File(filename + ".header");
 		indexFile = new RandomAccessFile(filename +".tree", "rw");
+		cache = new HashMap<>();
 		read();
 		this.keyType = columns[keyId].getType();
 	}
@@ -42,6 +46,7 @@ public class BPlusTreeInfo {
 		this.columns = columns;
 		this.keyId = keyId;
 		this.keyType = columns[keyId].getType();
+		cache = new HashMap<>();
 
 		headerFile = new File(filename + ".header");
 		indexFile = new RandomAccessFile(filename +".tree", "rw");
@@ -109,6 +114,15 @@ public class BPlusTreeInfo {
 		leafDataMaxLen = (pageSize -Global.PAGE_HEADER_SIZE) / leafDataSize;
 
 		write();
+	}
+
+	void writeCache() throws IOException {
+		Iterator iter = cache.entrySet().iterator();
+		while (iter.hasNext()) {
+			HashMap.Entry entry = (HashMap.Entry) iter.next();
+			BPlusTreeNodeP val = (BPlusTreeNodeP) entry.getValue();
+			val.write();
+		}
 	}
 
 	int findFreePage() throws IOException {

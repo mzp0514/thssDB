@@ -23,8 +23,10 @@ public class BPlusTreeLeafNodeP extends BPlusTreeNodeP{
 		this.nodeType = BPlusNodeType.LEAF.ordinal();
 		keys = new ArrayList<>(Collections.nCopies((int) (1.5 * info.leafDataMaxLen) + 1, null));
 		values = new ArrayList<>(Collections.nCopies((int) (1.5 * info.leafDataMaxLen) + 1, null));
-		write();
+//		write();
+
 		nodeSize = size;
+		info.cache.put(pageId, this);
 	}
 
 	BPlusTreeLeafNodeP(int pageId, BPlusTreeInfo info) throws IOException {
@@ -34,6 +36,7 @@ public class BPlusTreeLeafNodeP extends BPlusTreeNodeP{
 		keys = new ArrayList<>(Collections.nCopies((int) (1.5 * info.leafDataMaxLen) + 1, null));
 		values = new ArrayList<>(Collections.nCopies((int) (1.5 * info.leafDataMaxLen) + 1, null));
 		read();
+		info.cache.put(pageId, this);
 	}
 
 	@Override
@@ -124,7 +127,7 @@ public class BPlusTreeLeafNodeP extends BPlusTreeNodeP{
 		else {
 			valuesAdd(valueIndex, value);
 			keysAdd(valueIndex, key);
-			write();
+			//write();
 		}
 
 	}
@@ -135,7 +138,7 @@ public class BPlusTreeLeafNodeP extends BPlusTreeNodeP{
 		if (index >= 0) {
 			valuesRemove(index);
 			keysRemove(index);
-			write();
+			//write();
 		} else
 			throw new KeyNotExistException();
 	}
@@ -149,7 +152,11 @@ public class BPlusTreeLeafNodeP extends BPlusTreeNodeP{
 	Pair<Integer, Entry> split() throws IOException {
 		int from = (size() + 1) / 2;
 		int to = size();
-		BPlusTreeLeafNodeP newSiblingNode = new BPlusTreeLeafNodeP(info, to - from);
+		BPlusTreeLeafNodeP newSiblingNode = (BPlusTreeLeafNodeP) info.cache.get(to - from);
+		if(newSiblingNode == null) {
+			newSiblingNode = new BPlusTreeLeafNodeP(info, to - from);
+		}
+			//info.cache.put(to - from, newSiblingNode);
 		for (int i = 0; i < to - from; i++) {
 			newSiblingNode.keys.set(i, keys.get(i + from));
 			newSiblingNode.values.set(i, values.get(i + from));
@@ -159,7 +166,7 @@ public class BPlusTreeLeafNodeP extends BPlusTreeNodeP{
 		nodeSize = from;
 		newSiblingNode.nextPage = nextPage;
 		nextPage = newSiblingNode.pageId;
-		newSiblingNode.write();
+		//newSiblingNode.write();
 		return new Pair<>(newSiblingNode.pageId, newSiblingNode.getFirstLeafKey());
 	}
 
@@ -175,6 +182,6 @@ public class BPlusTreeLeafNodeP extends BPlusTreeNodeP{
 		nodeSize = index + length;
 		nextPage = node.nextPage;
 		info.freePages.add(node.pageId);
-		info.write();
+		//info.write();
 	}
 }
