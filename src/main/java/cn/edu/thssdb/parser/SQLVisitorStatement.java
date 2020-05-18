@@ -3,6 +3,7 @@ package cn.edu.thssdb.parser;
 import cn.edu.thssdb.query.QueryResult;
 import cn.edu.thssdb.schema.*;
 import cn.edu.thssdb.type.ColumnType;
+import cn.edu.thssdb.utils.Global;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
@@ -195,7 +196,27 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
     @Override
     public QueryResult visitShow_meta_stmt(SQLParser.Show_meta_stmtContext ctx) {
-        return null;
+        String tableName = ctx.table_name().getText().toLowerCase();
+        if (this.db.tableInDB(tableName))
+        {
+            try {
+                ArrayList<Column> cols = this.db.getTable(tableName).getColumns();
+                StringBuilder res = new StringBuilder();
+                for (Column col : cols)
+                {
+                    res.append("ColName: ").append(col.getName()).append(", ");
+                    if (col.getType() != ColumnType.STRING)
+                        res.append("Type: ").append(col.getType()).append('\n');
+                    else
+                        res.append("Type: ").append(col.getType()).append('(').append(col.getMaxLength()).append(')').append('\n');
+                }
+                return new QueryResult(res.toString());
+            } catch (IOException | ClassNotFoundException e) {
+                return new QueryResult("Shaw Table Failed: " + e.getMessage());
+            }
+        }
+        else
+            return new QueryResult(String.format("Table: %s not exists", tableName));
     }
 
     @Override
@@ -335,7 +356,10 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                                     break;
                                 case STRING:
                                     text = text.substring(1, text.length() - 1);
-                                    entries[i] = new Entry(text);
+                                    if (text.length() > allCol.get(i).getMaxLength())
+                                        return new QueryResult(String.format("Insert Error: String Length Out of Bound for Column %s", allColNames.get(i)));
+                                    int maxLength = allCol.get(i).getMaxLength();
+                                    entries[i] = new Entry(Global.resize(text, maxLength));
                                     break;
                                 default:
                                     break;

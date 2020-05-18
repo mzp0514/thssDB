@@ -335,4 +335,7 @@ public class TableP implements Iterable<Row> {
 	public Iterator<Row> iterator() {
 		return new TableIterator(this);
 	}
+
+
+	public ArrayList<Column> getColumns() { return columns; }
 }

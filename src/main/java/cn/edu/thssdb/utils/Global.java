@@ -17,7 +17,7 @@ public class Global {
   public static final String QUIT = "quit;";
   public static final String CONNECT_PREFIX = "connect";
 
-  public static final ArrayList<String> STATEMENT_PREFIX = new ArrayList<String>(Arrays.asList("create", "drop", "insert", "delete", "update", "select"));
+  public static final ArrayList<String> STATEMENT_PREFIX = new ArrayList<String>(Arrays.asList("create", "drop", "insert", "delete", "update", "select", "show"));
 
 
   public static int PAGE_SIZE = 4096;
