@@ -3,6 +3,7 @@ package cn.edu.thssdb.parser;
 import cn.edu.thssdb.query.QueryResult;
 import cn.edu.thssdb.schema.*;
 import cn.edu.thssdb.type.ColumnType;
+import cn.edu.thssdb.type.ComparisonType;
 import cn.edu.thssdb.utils.Global;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -17,6 +18,7 @@ import java.rmi.server.ExportException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
@@ -234,9 +236,67 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
         return null;
     }
 
+    public ComparisonType getComparisonType(String op){
+        switch (op){
+            case "=":
+                return ComparisonType.EQUAL;
+            case "<":
+                return ComparisonType.LESS;
+            case ">":
+                return ComparisonType.GREATER;
+            case "<=":
+                return ComparisonType.NGREATER;
+            case ">=":
+                return ComparisonType.NLESS;
+            case "<>":
+                return ComparisonType.NEQUAL;
+            default:
+                return ComparisonType.UNDECODE;
+
+        }
+
+    }
+
     @Override
     public QueryResult visitDelete_stmt(SQLParser.Delete_stmtContext ctx) {
-        return null;
+        String tableName = ctx.table_name().getText().toLowerCase();
+        if (this.db.tableInDB(tableName))
+        {
+            TableP table;
+            try{
+                table = this.db.getTable(tableName);
+                ArrayList<Row> rowsToDelete;
+                QueryResult mQuery = new QueryResult(table, null, true);
+                if (ctx.K_WHERE()!=null){
+                    String attrName = ctx.multiple_condition().getChild(1).getText();
+                    Object attrValue = ctx.multiple_condition().getChild(3).getText();
+                    ComparisonType op = getComparisonType(ctx.multiple_condition().getChild(2).getText());
+                    if (op == ComparisonType.UNDECODE){
+                        return new QueryResult("Delete Failed, Unsupported comparison type");
+                    }
+                    rowsToDelete = mQuery.queryVal_s(attrName, op, attrValue);
+                } else {
+                    rowsToDelete = mQuery.queryAll_s();
+                }
+
+                if (!rowsToDelete.isEmpty()) {
+                    table.delete(rowsToDelete);
+                    return new QueryResult(String.format("Delete %d row(s) successfully", rowsToDelete.size()));
+                } else {
+                    return new QueryResult("Delete Failed, No such conditions");
+                }
+
+
+            }
+            catch (Exception e){
+                return new QueryResult("Delete Failed: " + e.getMessage());
+            }
+        }
+        else
+        {
+            return new QueryResult(String.format("Delete Failed, Unknown table name: %s", tableName));
+        }
+
     }
 
     @Override
@@ -387,7 +447,61 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
     @Override
     public QueryResult visitSelect_stmt(SQLParser.Select_stmtContext ctx) {
-        return null;
+        if (ctx.table_query().get(0).K_JOIN()!=null) {
+            //多表select语句处理
+
+
+        } else {
+            //单表select语句处理
+            String tableName = ctx.table_query().get(0).getText();
+            if (this.db.tableInDB(tableName))
+            {
+                TableP table;
+                try{
+                    table = this.db.getTable(tableName);
+                    QueryResult mQuery;
+                    ArrayList<Row> rowsToSelect;
+
+                    ArrayList<String> columnNames = new ArrayList<String>();
+                    ctx.result_column().forEach(it -> {
+                        columnNames.add(it.getText());
+                    });
+
+                    if (columnNames.get(0).compareTo("*") == 0){
+                        mQuery = new QueryResult(table, null, true);
+                    } else {
+                        mQuery = new QueryResult(table, columnNames, false);
+                    }
+
+                    if (ctx.K_WHERE()!=null){
+                        String attrName = ctx.multiple_condition().getChild(1).getText();
+                        Object attrValue = ctx.multiple_condition().getChild(3).getText();
+                        ComparisonType op = getComparisonType(ctx.multiple_condition().getChild(2).getText());
+                        if (op == ComparisonType.UNDECODE){
+                            return new QueryResult("Select Failed, Unsupported comparison type");
+                        }
+                        rowsToSelect = mQuery.queryVal_s(attrName, op, attrValue);
+                    } else {
+                        rowsToSelect = mQuery.queryAll_s();
+                    }
+                    
+                    //拼接select结果
+                    StringJoiner result= new StringJoiner("\n");
+                    rowsToSelect.forEach(it -> {
+                        result.add(it.toString());
+                    });
+
+                    return new QueryResult(result.toString() + String.format("Select totally %d row(s) successfully", rowsToSelect.size()));
+                }
+                catch (Exception e){
+                    return new QueryResult("Select Failed: " + e.getMessage());
+                }
+            }
+            else
+            {
+                return new QueryResult(String.format("Select Failed, Unknown table name: %s", tableName));
+            }
+        }
     }
 
     @Override
@@ -402,7 +516,46 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
     @Override
     public QueryResult visitUpdate_stmt(SQLParser.Update_stmtContext ctx) {
-        return null;
+        String tableName = ctx.table_name().getText().toLowerCase();
+        if (this.db.tableInDB(tableName))
+        {
+            TableP table;
+            try{
+                table = this.db.getTable(tableName);
+                ArrayList<Row> rowsToUpdate;
+                QueryResult mQuery = new QueryResult(table, null, true);
+                String attrName = ctx.column_name().getText();
+                Object attrValue = ctx.expression().getText();
+
+                if (ctx.K_WHERE()!=null){
+                    String queryName = ctx.multiple_condition().getChild(1).getText();
+                    Object queryValue = ctx.multiple_condition().getChild(3).getText();
+                    ComparisonType op = getComparisonType(ctx.multiple_condition().getChild(2).getText());
+                    if (op == ComparisonType.UNDECODE){
+                        return new QueryResult("Update Failed, Unsupported comparison type");
+                    }
+                    rowsToUpdate = mQuery.queryVal_s(queryName, op, queryValue);
+                } else {
+                    rowsToUpdate = mQuery.queryAll_s();
+                }
+
+                if (!rowsToUpdate.isEmpty()) {
+                    table.update(rowsToUpdate, attrName, attrValue);
+                    return new QueryResult(String.format("Update %d row(s) successfully", rowsToUpdate.size()));
+                } else {
+                    return new QueryResult("Update Failed, No such conditions");
+                }
+
+
+            }
+            catch (Exception e){
+                return new QueryResult("Update Failed: " + e.getMessage());
+            }
+        }
+        else
+        {
+            return new QueryResult(String.format("Update Failed, Unknown table name: %s", tableName));
+        }
     }
 
     @Override
