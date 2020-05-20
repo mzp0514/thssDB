@@ -4,6 +4,7 @@ import cn.edu.thssdb.query.QueryResult;
 import cn.edu.thssdb.schema.*;
 import cn.edu.thssdb.type.ColumnType;
 import cn.edu.thssdb.type.ComparisonType;
+import cn.edu.thssdb.type.JoinType;
 import cn.edu.thssdb.utils.Global;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -449,6 +450,67 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
     public QueryResult visitSelect_stmt(SQLParser.Select_stmtContext ctx) {
         if (ctx.table_query().get(0).K_JOIN()!=null) {
             //多表select语句处理
+            ArrayList<TableP> queryTables = new ArrayList<TableP>();
+
+            SQLParser.Table_queryContext joinStmt = ctx.table_query().get(0);
+            List<SQLParser.Table_nameContext> tableName = joinStmt.table_name();
+            for (int i=0; i<tableName.size(); i++){
+                String name = tableName.get(i).getText();
+                if (this.db.tableInDB(name)){
+                    try {
+                        queryTables.add(this.db.getTable(name));
+                    } catch (Exception e) {
+                        return new QueryResult("Select Failed: " + e.getMessage());
+                    }
+                } else {
+                    return new QueryResult(String.format("Select Failed, Unknown table name: %s", tableName));
+                }
+            }
+            try {
+                QueryResult mQuery;
+
+                ArrayList<String> columnNames = new ArrayList<String>();
+                ctx.result_column().forEach(it -> {
+                    columnNames.add(it.getText());
+                });
+                String attrName1 = joinStmt.multiple_condition().getChild(1).getText();
+                String attrName2 = joinStmt.multiple_condition().getChild(3).getText();
+                if (joinStmt.multiple_condition().getChild(2).getText().compareTo("=")!=0){
+                    return new QueryResult("Select Failed, Unsupported On statement");
+                }
+                if (columnNames.get(0).compareTo("*") == 0){
+                    mQuery = new QueryResult(queryTables, null, attrName1, attrName2, JoinType.INNER_JOIN,true);
+                } else {
+                    mQuery = new QueryResult(queryTables, columnNames, attrName1, attrName2, JoinType.INNER_JOIN,false);
+                }
+
+                ArrayList<Row> rowsToSelect;
+                if (ctx.K_WHERE()!=null){
+                    String attrName = ctx.multiple_condition().getChild(1).getText();
+                    Object attrValue = ctx.multiple_condition().getChild(3).getText();
+                    ComparisonType op = getComparisonType(ctx.multiple_condition().getChild(2).getText());
+                    if (op == ComparisonType.UNDECODE){
+                        return new QueryResult("Select Failed, Unsupported comparison type");
+                    }
+                    rowsToSelect = mQuery.queryVal(attrName, op, attrValue);
+                } else {
+                    rowsToSelect = mQuery.queryAll();
+                }
+
+                //拼接select结果
+                StringJoiner header = new StringJoiner(", ");
+                mQuery.getAttrNames().forEach(header::add);
+                StringJoiner result= new StringJoiner("\n");
+                result.add(header.toString());
+                rowsToSelect.forEach(it -> {
+                    result.add(it.toString());
+                });
+                result.add(String.format("Select totally %d row(s) successfully", rowsToSelect.size()));
+                return new QueryResult(result.toString());
+
+            } catch (Exception e){
+                return new QueryResult("Select Failed: " + e.getMessage());
+            }
 
 
         } else {
@@ -486,12 +548,15 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                     }
                     
                     //拼接select结果
+                    StringJoiner header = new StringJoiner(", ");
+                    mQuery.getAttrNames().forEach(header::add);
                     StringJoiner result= new StringJoiner("\n");
+                    result.add(header.toString());
                     rowsToSelect.forEach(it -> {
                         result.add(it.toString());
                     });
-
-                    return new QueryResult(result.toString() + String.format("Select totally %d row(s) successfully", rowsToSelect.size()));
+                    result.add(String.format("Select totally %d row(s) successfully", rowsToSelect.size()));
+                    return new QueryResult(result.toString());
                 }
                 catch (Exception e){
                     return new QueryResult("Select Failed: " + e.getMessage());
