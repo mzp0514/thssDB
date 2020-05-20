@@ -269,9 +269,40 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                 ArrayList<Row> rowsToDelete;
                 QueryResult mQuery = new QueryResult(table, null, true);
                 if (ctx.K_WHERE()!=null){
-                    String attrName = ctx.multiple_condition().getChild(1).getText();
-                    Object attrValue = ctx.multiple_condition().getChild(3).getText();
-                    ComparisonType op = getComparisonType(ctx.multiple_condition().getChild(2).getText());
+                    String attrName = ctx.multiple_condition().condition().getChild(0).getText().toLowerCase();
+                    Object attrValue;
+                    String attrValueOrigin = ctx.multiple_condition().condition().getChild(2).getText();
+                    ArrayList<Column> allCol = table.columns;
+                    int loc = -1;
+                    for (int i=0; i<allCol.size(); i++){
+                        if (attrName.compareTo(allCol.get(i).getName())==0){
+                            loc = i;
+                            break;
+                        }
+                    }
+                    if (loc == -1){
+                        return new QueryResult("Delete Failed, Unknown Key");
+                    } else {
+                        switch (allCol.get(loc).getType()){
+                            case INT:
+                                attrValue = Integer.valueOf(attrValueOrigin);
+                                break;
+                            case DOUBLE:
+                                attrValue = Double.valueOf(attrValueOrigin);
+                                break;
+                            case FLOAT:
+                                attrValue = Float.valueOf(attrValueOrigin);
+                                break;
+                            case LONG:
+                                attrValue = Long.valueOf(attrValueOrigin);
+                                break;
+                            case STRING:
+                            default:
+                                attrValue = attrValueOrigin;
+                                break;
+                        }
+                    }
+                    ComparisonType op = getComparisonType(ctx.multiple_condition().condition().getChild(1).getText());
                     if (op == ComparisonType.UNDECODE){
                         return new QueryResult("Delete Failed, Unsupported comparison type");
                     }
@@ -448,14 +479,14 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
     @Override
     public QueryResult visitSelect_stmt(SQLParser.Select_stmtContext ctx) {
-        if (ctx.table_query().get(0).K_JOIN()!=null) {
+        if (ctx.table_query().get(0).K_JOIN().size()!=0) {
             //多表select语句处理
             ArrayList<TableP> queryTables = new ArrayList<TableP>();
 
             SQLParser.Table_queryContext joinStmt = ctx.table_query().get(0);
             List<SQLParser.Table_nameContext> tableName = joinStmt.table_name();
             for (int i=0; i<tableName.size(); i++){
-                String name = tableName.get(i).getText();
+                String name = tableName.get(i).getText().toLowerCase();
                 if (this.db.tableInDB(name)){
                     try {
                         queryTables.add(this.db.getTable(name));
@@ -471,11 +502,11 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
                 ArrayList<String> columnNames = new ArrayList<String>();
                 ctx.result_column().forEach(it -> {
-                    columnNames.add(it.getText());
+                    columnNames.add(it.getText().toLowerCase());
                 });
-                String attrName1 = joinStmt.multiple_condition().getChild(1).getText();
-                String attrName2 = joinStmt.multiple_condition().getChild(3).getText();
-                if (joinStmt.multiple_condition().getChild(2).getText().compareTo("=")!=0){
+                String attrName1 = joinStmt.multiple_condition().condition().getChild(0).getText().toLowerCase();
+                String attrName2 = joinStmt.multiple_condition().condition().getChild(2).getText().toLowerCase();
+                if (joinStmt.multiple_condition().condition().getChild(1).getText().compareTo("=")!=0){
                     return new QueryResult("Select Failed, Unsupported On statement");
                 }
                 if (columnNames.get(0).compareTo("*") == 0){
@@ -486,9 +517,90 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
                 ArrayList<Row> rowsToSelect;
                 if (ctx.K_WHERE()!=null){
-                    String attrName = ctx.multiple_condition().getChild(1).getText();
-                    Object attrValue = ctx.multiple_condition().getChild(3).getText();
-                    ComparisonType op = getComparisonType(ctx.multiple_condition().getChild(2).getText());
+                    String attrName = ctx.multiple_condition().condition().getChild(0).getText().toLowerCase();
+                    String attrValueOrigin = ctx.multiple_condition().condition().getChild(2).getText();
+                    Object attrValue;
+                    String[] s = attrName.split("\\.");
+                    if (s.length == 2){
+                        int loc = -1;
+                        for (int i=0; i<tableName.size(); i++) {
+                            if (s[0].toLowerCase().compareTo(tableName.get(i).getText().toLowerCase()) == 0) {
+                                loc = i;
+                                break;
+                            }
+                        }
+                        ArrayList<Column> allCol = queryTables.get(loc).columns;
+                        loc = -1;
+                        for (int i=0; i<allCol.size(); i++){
+                            if (s[1].toLowerCase().compareTo(allCol.get(i).getName())==0){
+                                loc = i;
+                                break;
+                            }
+                        }
+                        if (loc==-1) {
+                            return new QueryResult("Delete Failed, Unknown Key");
+                        } else {
+                            switch (allCol.get(loc).getType()){
+                                case INT:
+                                    attrValue = Integer.valueOf(attrValueOrigin);
+                                    break;
+                                case DOUBLE:
+                                    attrValue = Double.valueOf(attrValueOrigin);
+                                    break;
+                                case FLOAT:
+                                    attrValue = Float.valueOf(attrValueOrigin);
+                                    break;
+                                case LONG:
+                                    attrValue = Long.valueOf(attrValueOrigin);
+                                    break;
+                                case STRING:
+                                default:
+                                    attrValue = attrValueOrigin;
+                                    break;
+                            }
+                        }
+                    } else {
+                        ArrayList<Column> allCol = queryTables.get(0).columns;
+                        int loc = -1;
+                        for (int i=0; i<allCol.size(); i++){
+                            if (attrName.compareTo(allCol.get(i).getName())==0){
+                                loc = i;
+                                break;
+                            }
+                        }
+                        if (loc == -1) {
+                            allCol = queryTables.get(1).columns;
+                            for (int i = 0; i < allCol.size(); i++) {
+                                if (attrName.compareTo(allCol.get(i).getName()) == 0) {
+                                    loc = i;
+                                    break;
+                                }
+                            }
+                        }
+                        if (loc == -1) {
+                            return new QueryResult("Delete Failed, Unknown Key");
+                        } else {
+                            switch (allCol.get(loc).getType()){
+                                case INT:
+                                    attrValue = Integer.valueOf(attrValueOrigin);
+                                    break;
+                                case DOUBLE:
+                                    attrValue = Double.valueOf(attrValueOrigin);
+                                    break;
+                                case FLOAT:
+                                    attrValue = Float.valueOf(attrValueOrigin);
+                                    break;
+                                case LONG:
+                                    attrValue = Long.valueOf(attrValueOrigin);
+                                    break;
+                                case STRING:
+                                default:
+                                    attrValue = attrValueOrigin;
+                                    break;
+                            }
+                        }
+                    }
+                    ComparisonType op = getComparisonType(ctx.multiple_condition().condition().getChild(1).getText());
                     if (op == ComparisonType.UNDECODE){
                         return new QueryResult("Select Failed, Unsupported comparison type");
                     }
@@ -515,7 +627,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
         } else {
             //单表select语句处理
-            String tableName = ctx.table_query().get(0).getText();
+            String tableName = ctx.table_query().get(0).getText().toLowerCase();
             if (this.db.tableInDB(tableName))
             {
                 TableP table;
@@ -526,7 +638,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
                     ArrayList<String> columnNames = new ArrayList<String>();
                     ctx.result_column().forEach(it -> {
-                        columnNames.add(it.getText());
+                        columnNames.add(it.getText().toLowerCase());
                     });
 
                     if (columnNames.get(0).compareTo("*") == 0){
@@ -536,9 +648,40 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                     }
 
                     if (ctx.K_WHERE()!=null){
-                        String attrName = ctx.multiple_condition().getChild(1).getText();
-                        Object attrValue = ctx.multiple_condition().getChild(3).getText();
-                        ComparisonType op = getComparisonType(ctx.multiple_condition().getChild(2).getText());
+                        String attrName = ctx.multiple_condition().condition().getChild(0).getText().toLowerCase();
+                        Object attrValue;
+                        String attrValueOrigin = ctx.multiple_condition().condition().getChild(2).getText();
+                        ArrayList<Column> allCol = table.columns;
+                        int loc = -1;
+                        for (int i=0; i<allCol.size(); i++){
+                            if (attrName.compareTo(allCol.get(i).getName())==0){
+                                loc = i;
+                                break;
+                            }
+                        }
+                        if (loc == -1){
+                            return new QueryResult("Select Failed, Unknown Key");
+                        } else {
+                            switch (allCol.get(loc).getType()){
+                                case INT:
+                                    attrValue = Integer.valueOf(attrValueOrigin);
+                                    break;
+                                case DOUBLE:
+                                    attrValue = Double.valueOf(attrValueOrigin);
+                                    break;
+                                case FLOAT:
+                                    attrValue = Float.valueOf(attrValueOrigin);
+                                    break;
+                                case LONG:
+                                    attrValue = Long.valueOf(attrValueOrigin);
+                                    break;
+                                case STRING:
+                                default:
+                                    attrValue = attrValueOrigin;
+                                    break;
+                            }
+                        }
+                        ComparisonType op = getComparisonType(ctx.multiple_condition().condition().getChild(1).getText());
                         if (op == ComparisonType.UNDECODE){
                             return new QueryResult("Select Failed, Unsupported comparison type");
                         }
@@ -549,7 +692,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                     
                     //拼接select结果
                     StringJoiner header = new StringJoiner(", ");
-                    mQuery.getAttrNames().forEach(header::add);
+                    mQuery.getAttrNames_s().forEach(header::add);
                     StringJoiner result= new StringJoiner("\n");
                     result.add(header.toString());
                     rowsToSelect.forEach(it -> {
@@ -589,13 +732,73 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                 table = this.db.getTable(tableName);
                 ArrayList<Row> rowsToUpdate;
                 QueryResult mQuery = new QueryResult(table, null, true);
-                String attrName = ctx.column_name().getText();
-                Object attrValue = ctx.expression().getText();
-
+                String attrName = ctx.column_name().getText().toLowerCase();
+                Object attrValue;
+                String attrValueOrigin = ctx.expression().getText();
+                ArrayList<Column> allCol = table.columns;
+                int loc = -1;
+                for (int i=0; i<allCol.size(); i++){
+                    if (attrName.compareTo(allCol.get(i).getName())==0){
+                        loc = i;
+                        break;
+                    }
+                }
+                if (loc == -1){
+                    return new QueryResult("Delete Failed, Unknown Key");
+                } else {
+                    switch (allCol.get(loc).getType()){
+                        case INT:
+                            attrValue = Integer.valueOf(attrValueOrigin);
+                            break;
+                        case DOUBLE:
+                            attrValue = Double.valueOf(attrValueOrigin);
+                            break;
+                        case FLOAT:
+                            attrValue = Float.valueOf(attrValueOrigin);
+                            break;
+                        case LONG:
+                            attrValue = Long.valueOf(attrValueOrigin);
+                            break;
+                        case STRING:
+                        default:
+                            attrValue = attrValueOrigin;
+                            break;
+                    }
+                }
                 if (ctx.K_WHERE()!=null){
-                    String queryName = ctx.multiple_condition().getChild(1).getText();
-                    Object queryValue = ctx.multiple_condition().getChild(3).getText();
-                    ComparisonType op = getComparisonType(ctx.multiple_condition().getChild(2).getText());
+                    String queryName = ctx.multiple_condition().condition().getChild(0).getText().toLowerCase();
+                    Object queryValue;
+                    String queryValueOrigin = ctx.multiple_condition().condition().getChild(2).getText();
+                    loc = -1;
+                    for (int i=0; i<allCol.size(); i++){
+                        if (attrName.compareTo(allCol.get(i).getName())==0){
+                            loc = i;
+                            break;
+                        }
+                    }
+                    if (loc == -1){
+                        return new QueryResult("Update Failed, Unknown Key");
+                    } else {
+                        switch (allCol.get(loc).getType()){
+                            case INT:
+                                queryValue = Integer.valueOf(queryValueOrigin);
+                                break;
+                            case DOUBLE:
+                                queryValue = Double.valueOf(queryValueOrigin);
+                                break;
+                            case FLOAT:
+                                queryValue = Float.valueOf(queryValueOrigin);
+                                break;
+                            case LONG:
+                                queryValue = Long.valueOf(queryValueOrigin);
+                                break;
+                            case STRING:
+                            default:
+                                queryValue = queryValueOrigin;
+                                break;
+                        }
+                    }
+                    ComparisonType op = getComparisonType(ctx.multiple_condition().condition().getChild(1).getText());
                     if (op == ComparisonType.UNDECODE){
                         return new QueryResult("Update Failed, Unsupported comparison type");
                     }
