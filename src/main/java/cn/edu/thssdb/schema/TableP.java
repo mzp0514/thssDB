@@ -302,7 +302,7 @@ public class TableP implements Iterable<Row> {
 	public int getAttrIndex(String attrName){
 		int attrId = 0;
 
-		while(!this.columns.get(attrId).getName().equals(attrName)){
+		while(attrId < columns.size() && !columns.get(attrId).getName().equals(attrName)){
 			attrId ++;
 		}
 		if(attrId < columns.size()) {
