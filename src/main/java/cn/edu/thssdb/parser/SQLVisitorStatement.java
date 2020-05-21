@@ -799,7 +799,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                     String queryValueOrigin = ctx.multiple_condition().condition().getChild(2).getText();
                     loc = -1;
                     for (int i=0; i<allCol.size(); i++){
-                        if (attrName.compareTo(allCol.get(i).getName())==0){
+                        if (queryName.compareTo(allCol.get(i).getName())==0){
                             loc = i;
                             break;
                         }
