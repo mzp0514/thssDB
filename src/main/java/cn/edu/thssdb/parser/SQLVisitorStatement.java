@@ -504,17 +504,25 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                 ctx.result_column().forEach(it -> {
                     columnNames.add(it.getText().toLowerCase());
                 });
-                String attrName1 = joinStmt.multiple_condition().condition().getChild(0).getText().toLowerCase();
-                String attrName2 = joinStmt.multiple_condition().condition().getChild(2).getText().toLowerCase();
-                if (joinStmt.multiple_condition().condition().getChild(1).getText().compareTo("=")!=0){
-                    return new QueryResult("Select Failed, Unsupported On statement");
-                }
-                if (columnNames.get(0).compareTo("*") == 0){
-                    mQuery = new QueryResult(queryTables, null, attrName1, attrName2, JoinType.INNER_JOIN,true);
-                } else {
-                    mQuery = new QueryResult(queryTables, columnNames, attrName1, attrName2, JoinType.INNER_JOIN,false);
-                }
 
+                if (ctx.table_query().get(0).K_NATURAL()!=null) {
+                    if (columnNames.get(0).compareTo("*") == 0) {
+                        mQuery = new QueryResult(queryTables, null, null, null, JoinType.NATURAL_JOIN, true);
+                    } else {
+                        mQuery = new QueryResult(queryTables, columnNames, null, null, JoinType.NATURAL_JOIN, false);
+                    }
+                } else {
+                    String attrName1 = joinStmt.multiple_condition().condition().getChild(0).getText().toLowerCase();
+                    String attrName2 = joinStmt.multiple_condition().condition().getChild(2).getText().toLowerCase();
+                    if (joinStmt.multiple_condition().condition().getChild(1).getText().compareTo("=") != 0) {
+                        return new QueryResult("Select Failed, Unsupported On statement");
+                    }
+                    if (columnNames.get(0).compareTo("*") == 0) {
+                        mQuery = new QueryResult(queryTables, null, attrName1, attrName2, JoinType.INNER_JOIN, true);
+                    } else {
+                        mQuery = new QueryResult(queryTables, columnNames, attrName1, attrName2, JoinType.INNER_JOIN, false);
+                    }
+                }
                 ArrayList<Row> rowsToSelect;
                 if (ctx.K_WHERE()!=null){
                     String attrName = ctx.multiple_condition().condition().getChild(0).getText().toLowerCase();
