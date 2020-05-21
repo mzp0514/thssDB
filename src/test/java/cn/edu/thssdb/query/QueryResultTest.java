@@ -42,11 +42,6 @@ public class QueryResultTest {
 		columns2[3] = new Column("www", ColumnType.DOUBLE, 0, true, 0);
 		columns2[4] = new Column("eee", ColumnType.DOUBLE, 0, true, 0);
 
-	}
-
-	@Test
-	public void insertTest() throws IOException {
-
 		TableP table = new TableP("dbtest", "tb", columns);
 		TableP table2 = new TableP("dbtest", "tb2", columns2);
 		Entry[] entries = new Entry[5];
@@ -72,6 +67,8 @@ public class QueryResultTest {
 		table.close();
 		table2.close();
 	}
+
+
 
 	@Test
 	public void selectTest1() throws IOException, ClassNotFoundException {
