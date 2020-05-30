@@ -70,6 +70,9 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
     @Override
     public QueryResult visitCreate_table_stmt(SQLParser.Create_table_stmtContext ctx) {
+        if (this.db.txManager.getTransactionState(this.sessionID)) {
+            return new QueryResult(String.format("Create failed, transaction mode does not support this statement"));
+        }
         String tableName = ctx.table_name().getText().toLowerCase();
         if (this.db.tableInDB(tableName))
             return new QueryResult(String.format("Create failed, table %s already exists.", tableName));
@@ -266,6 +269,13 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
             TableP table;
             try{
                 table = this.db.getTable(tableName);
+                if (table.currentSessionID != this.sessionID){
+                    if (table.currentSessionID == -1){
+                        table.currentSessionID = this.sessionID;
+                    } else {
+                        return new QueryResult("Delete Failed, current table has been locked");
+                    }
+                }
                 ArrayList<Row> rowsToDelete;
                 QueryResult mQuery = new QueryResult(table, null, true);
                 if (ctx.K_WHERE()!=null){
@@ -317,6 +327,14 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
                 if (!rowsToDelete.isEmpty()) {
                     table.delete(rowsToDelete);
+
+                    if (this.db.txManager.getTransactionState(this.sessionID)) {
+                        table.rowsForActions.push(rowsToDelete);
+                        table.actionType.push(Global.STATE_TYPE.DELETE);
+                    } else {
+                        table.persist();
+                        table.currentSessionID = -1;
+                    }
                     return new QueryResult(String.format("Delete %d row(s) successfully", rowsToDelete.size()));
                 } else {
                     return new QueryResult("Delete Failed, No such conditions");
@@ -337,6 +355,10 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
     @Override
     public QueryResult visitDrop_table_stmt(SQLParser.Drop_table_stmtContext ctx) {
+        if (this.db.txManager.getTransactionState(this.sessionID)) {
+            return new QueryResult("Drop failed, transaction mode does not support this statement");
+        }
+
         String tableName = ctx.table_name().getText().toLowerCase();
         if (this.db.tableInDB(tableName))
         {
@@ -376,6 +398,14 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
             TableP table;
             try {
                 table = this.db.getTable(tableName);
+                if (table.currentSessionID != this.sessionID){
+                    if (table.currentSessionID == -1){
+                        table.currentSessionID = this.sessionID;
+                    } else {
+                        return new QueryResult("Insert Failed, current table has been locked");
+                    }
+                }
+
                 List<SQLParser.Column_nameContext> colsToInsert = ctx.column_name();
                 List<SQLParser.Value_entryContext> rowsToInsert = ctx.value_entry();
                 HashSet<String> colNameSet = ctx.column_name().stream().map(x -> x.IDENTIFIER().getText().toLowerCase()).collect(Collectors.toCollection(HashSet::new));
@@ -419,6 +449,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
                 }
 
+                ArrayList<Row> rowsN = new ArrayList<>();
                 for (SQLParser.Value_entryContext row : rowsToInsert)
                 {
                     List<SQLParser.Literal_valueContext> entriesToInsert = row.literal_value();
@@ -463,7 +494,17 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                         }
                     }
                     Row r = new Row(entries);
+                    if (this.db.txManager.getTransactionState(this.sessionID)) {
+                        rowsN.add(r);
+                    }
                     table.insert(r);
+                }
+                if (this.db.txManager.getTransactionState(this.sessionID)) {
+                    table.rowsForActions.push(rowsN);
+                    table.actionType.push(Global.STATE_TYPE.INSERT);
+                } else {
+                    table.persist();
+                    table.currentSessionID = -1;
                 }
                 return new QueryResult(String.format("Insert %d row(s) successfully", rowsToInsert.size()));
 
@@ -754,6 +795,14 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
             TableP table;
             try{
                 table = this.db.getTable(tableName);
+                if (table.currentSessionID != this.sessionID){
+                    if (table.currentSessionID == -1){
+                        table.currentSessionID = this.sessionID;
+                    } else {
+                        return new QueryResult("Update Failed, current table has been locked");
+                    }
+                }
+
                 ArrayList<Row> rowsToUpdate;
                 QueryResult mQuery = new QueryResult(table, null, true);
                 String attrName = ctx.column_name().getText().toLowerCase();
@@ -841,6 +890,13 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
                 if (!rowsToUpdate.isEmpty()) {
                     table.update(rowsToUpdate, attrName, attrValue);
+                    if (this.db.txManager.getTransactionState(this.sessionID)) {
+                        table.rowsForActions.push(rowsToUpdate);
+                        table.actionType.push(Global.STATE_TYPE.UPDATE);
+                    } else {
+                        table.persist();
+                        table.currentSessionID = -1;
+                    }
                     return new QueryResult(String.format("Update %d row(s) successfully", rowsToUpdate.size()));
                 } else {
                     return new QueryResult("Update Failed, No such conditions");
@@ -856,6 +912,24 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
         {
             return new QueryResult(String.format("Update Failed, Unknown table name: %s", tableName));
         }
+    }
+
+    @Override
+    public QueryResult visitBegin_transaction_stmt(SQLParser.Begin_transaction_stmtContext ctx) {
+        this.db.txManager.beginTransaction(this.sessionID);
+        return new QueryResult("Start Transaction");
+    }
+
+    @Override
+    public QueryResult visitCommit_stmt(SQLParser.Commit_stmtContext ctx){
+        this.db.txManager.commitTransaction(this.sessionID);
+        return new QueryResult("Commit succeed");
+    }
+
+    @Override
+    public QueryResult visitRollback_stmt(SQLParser.Rollback_stmtContext ctx){
+        this.db.txManager.rollbackTransaction(this.sessionID);
+        return new QueryResult("Rollback succeed");
     }
 
     @Override

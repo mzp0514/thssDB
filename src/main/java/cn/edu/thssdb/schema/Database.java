@@ -32,6 +32,7 @@ public class Database {
   private File dbDir;
   private File dbMeta;
   private Timestamp lastModifyTimeStamp;
+  public TransactionManager txManager;
   ReentrantReadWriteLock lock;
 
   public Database(String name) throws IOException, ClassNotFoundException {
@@ -42,6 +43,7 @@ public class Database {
     this.dbDir = new File(this.filePath);
     this.dbMeta = new File(this.filePath + this.databaseName + ".dbmeta");
     this.lock = new ReentrantReadWriteLock();
+    this.txManager = new TransactionManager(this);
     recover();
     persist();
   }

@@ -41,6 +41,11 @@ public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
 		this.info.close();
 	}
 
+	public void persist() throws IOException {
+		this.info.write();
+		this.info.writeCache();
+	}
+
 	public Row get(Entry key) throws IOException {
 		if (key == null) throw new IllegalArgumentException("argument key to get() is null");
 		return root.get(key);
@@ -80,7 +85,7 @@ public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
 		if (root instanceof BPlusTreeInternalNodeP && root.size() == 0) {
 			info.rootPage = ((BPlusTreeInternalNodeP) root).children.get(0);
 			root = page2instance(info.rootPage);
-			info.write();
+			//info.write();
 		}
 	}
 
