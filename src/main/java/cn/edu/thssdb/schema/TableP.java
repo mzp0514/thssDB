@@ -5,6 +5,7 @@ import cn.edu.thssdb.exception.DuplicateColumnNameException;
 import cn.edu.thssdb.index.BPlusTreeIteratorP;
 import cn.edu.thssdb.index.BPlusTreeP;
 import cn.edu.thssdb.type.ComparisonType;
+import cn.edu.thssdb.utils.Global;
 import com.sun.corba.se.spi.ior.ObjectKey;
 import javafx.util.Pair;
 
@@ -12,6 +13,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Stack;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
@@ -23,12 +25,20 @@ public class TableP implements Iterable<Row> {
 	public ArrayList<Column> columns;
 	public BPlusTreeP index;
 	public int primaryKey;
+	public long currentSessionID;
+	public Stack<ArrayList<Row>> rowsForActions;
+	public Stack<ArrayList<Row>> rowsForActionsAppend;
+	public Stack<Global.STATE_TYPE> actionType;
 	File metaFile;
 
 	public TableP(String databaseName, String tableName, Column[] columns) throws IOException {
 		// TODO
 		this.databaseName = new String(databaseName);
 		this.tableName = new String(tableName);
+		this.currentSessionID = -1;
+		this.rowsForActions = new Stack<>();
+		this.rowsForActionsAppend = new Stack<>();
+		this.actionType = new Stack<>();
 
 		this.filePath = new String("data/" + this.databaseName + "/");
 
@@ -59,6 +69,10 @@ public class TableP implements Iterable<Row> {
 
 		this.databaseName = new String(databaseName);
 		this.tableName = new String(tableName);
+		this.currentSessionID = -1;
+		this.rowsForActions = new Stack<>();
+		this.rowsForActionsAppend = new Stack<>();
+		this.actionType = new Stack<>();
 
 		this.filePath = new String("data/" + this.databaseName + "/");
 
@@ -81,6 +95,16 @@ public class TableP implements Iterable<Row> {
 		ArrayList<Entry> entries = row.getEntries();
 
 		this.index.put(entries.get(this.primaryKey), row);
+
+	}
+
+	public void insert(ArrayList<Row> rows) throws IOException {
+		// TODO
+		for (Row row: rows) {
+			ArrayList<Entry> entries = row.getEntries();
+
+			this.index.put(entries.get(this.primaryKey), row);
+		}
 
 	}
 
@@ -108,13 +132,16 @@ public class TableP implements Iterable<Row> {
 
 	public void update(ArrayList<Row> rows, String attrName, Object attrValue) throws IOException {
 		// TODO
+		ArrayList<Row> res = new ArrayList<>();
 		for(Row row : rows) {
 			int attrId = this.getAttrIndex(attrName);
 			Entry key = row.getEntries().get(this.primaryKey);
 			Row dest = row;
 			dest.updateEntry(attrId, new Entry((Comparable) attrValue));
+			res.add(dest);
 			this.index.update(key, dest);
 		}
+		this.rowsForActionsAppend.push(res);
 	}
 
 
@@ -302,7 +329,7 @@ public class TableP implements Iterable<Row> {
 	public int getAttrIndex(String attrName){
 		int attrId = 0;
 
-		while(!this.columns.get(attrId).getName().equals(attrName)){
+		while(attrId < columns.size() && !columns.get(attrId).getName().equals(attrName)){
 			attrId ++;
 		}
 		if(attrId < columns.size()) {
@@ -338,4 +365,13 @@ public class TableP implements Iterable<Row> {
 
 
 	public ArrayList<Column> getColumns() { return columns; }
+
+
+	public void persist() throws IOException {
+		this.actionType.clear();
+		this.rowsForActions.clear();
+		this.rowsForActionsAppend.clear();
+		this.index.persist();
+		this.currentSessionID = -1;
+	}
 }

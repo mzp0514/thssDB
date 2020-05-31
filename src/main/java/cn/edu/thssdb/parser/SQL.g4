@@ -25,7 +25,10 @@ sql_stmt :
     | show_table_stmt
     | show_meta_stmt
     | quit_stmt
-    | update_stmt ;
+    | update_stmt
+    | begin_transaction_stmt
+    | commit_stmt
+    | rollback_stmt;
 
 create_db_stmt :
     K_CREATE K_DATABASE database_name ;
@@ -90,6 +93,15 @@ drop_view_stmt :
 update_stmt :
     K_UPDATE table_name
         K_SET column_name '=' expression ( K_WHERE multiple_condition )? ;
+
+begin_transaction_stmt :
+    K_BEGIN K_TRANSACTION ;
+
+commit_stmt :
+    K_COMMIT K_TRANSACTION ;
+
+rollback_stmt :
+    K_ROLLBACK K_TRANSACTION;
 
 column_def :
     column_name type_name column_constraint* ;
@@ -192,8 +204,10 @@ T_STRING : S T R I N G;
 K_ADD : A D D;
 K_ALL : A L L;
 K_AS : A S;
+K_BEGIN : B E G I N;
 K_BY : B Y;
 K_COLUMN : C O L U M N;
+K_COMMIT : C O M M I T;
 K_CREATE : C R E A T E;
 K_DATABASE : D A T A B A S E;
 K_DATABASES : D A T A B A S E S;
@@ -216,11 +230,13 @@ K_ON : O N;
 K_PRIMARY : P R I M A R Y;
 K_QUIT : Q U I T;
 K_REVOKE : R E V O K E;
+K_ROLLBACK : R O L L B A C K;
 K_SELECT : S E L E C T;
 K_SET : S E T;
 K_SHOW : S H O W;
 K_TABLE : T A B L E;
 K_TO : T O;
+K_TRANSACTION : T R A N S A C T I O N;
 K_UPDATE : U P D A T E;
 K_USE : U S E;
 K_USER : U S E R;

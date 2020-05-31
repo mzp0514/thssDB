@@ -53,6 +53,8 @@ public class IServiceHandler implements IService.Iface {
     {
       Status status = new Status(Global.SUCCESS_CODE);
       status.msg = "Login Success!";
+      manager.getCurDB().txManager.insertSession(sessionID);
+
       resp.setStatus(status);
     }
     else
@@ -82,7 +84,6 @@ public class IServiceHandler implements IService.Iface {
     {
       String statement = req.getStatement();
       logger.info("Statement: " + statement + " received, ready to parse");
-
 
       try {
         SQLLexer lexer = new SQLLexer(CharStreams.fromString(statement));
