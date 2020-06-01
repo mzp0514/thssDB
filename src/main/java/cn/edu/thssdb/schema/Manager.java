@@ -142,6 +142,11 @@ public class Manager {
     }
   }
 
+  public void disconnect(long sessionID) {
+    if (sessionDBMap.containsKey(sessionID))
+      sessionDBMap.remove(sessionID);
+  }
+
   private void recover() throws IOException, ClassNotFoundException {
 
     if (!this.dbManagerDir.exists() || !this.dbManagerMeta.exists())

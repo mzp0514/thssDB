@@ -6,15 +6,7 @@ import cn.edu.thssdb.parser.SQLLexer;
 import cn.edu.thssdb.parser.SQLParser;
 import cn.edu.thssdb.parser.SQLVisitorStatement;
 import cn.edu.thssdb.query.QueryResult;
-import cn.edu.thssdb.rpc.thrift.ConnectReq;
-import cn.edu.thssdb.rpc.thrift.ConnectResp;
-import cn.edu.thssdb.rpc.thrift.DisconnetResp;
-import cn.edu.thssdb.rpc.thrift.ExecuteStatementReq;
-import cn.edu.thssdb.rpc.thrift.ExecuteStatementResp;
-import cn.edu.thssdb.rpc.thrift.GetTimeReq;
-import cn.edu.thssdb.rpc.thrift.GetTimeResp;
-import cn.edu.thssdb.rpc.thrift.IService;
-import cn.edu.thssdb.rpc.thrift.Status;
+import cn.edu.thssdb.rpc.thrift.*;
 import cn.edu.thssdb.schema.Manager;
 import cn.edu.thssdb.utils.Global;
 import org.antlr.v4.runtime.CharStream;
@@ -67,9 +59,16 @@ public class IServiceHandler implements IService.Iface {
   }
 
   @Override
-  public DisconnetResp disconnect(DisconnetResp req) throws TException {
+  public DisconnetResp disconnect(DisconnetReq req) throws TException {
     // TODO
-    return null;
+    DisconnetResp resp = new DisconnetResp();
+    long sessionID = req.getSessionId();
+    Manager manager = Manager.getInstance();
+    manager.disconnect(sessionID);
+    Status status = new Status(Global.SUCCESS_CODE);
+    status.msg = "Bye!";
+    resp.setStatus(status);
+    return resp;
   }
 
   @Override

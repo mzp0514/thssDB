@@ -68,6 +68,7 @@ public class Client {
             break;
           case Global.QUIT:
             open = false;
+            disConnect(sessionID);
             break;
           default:
             String command = msg.trim();
@@ -167,6 +168,17 @@ public class Client {
       logger.error(e.getMessage());
     }
 
+  }
+
+  private static void disConnect(long sessionID) {
+    DisconnetReq req = new DisconnetReq(sessionID);
+    try {
+      DisconnetResp resp = client.disconnect(req);
+      Status status = resp.getStatus();
+      print(status.getMsg());
+    } catch (TException e) {
+      logger.error(e.getMessage());
+    }
   }
 
   static Options createOptions() {
