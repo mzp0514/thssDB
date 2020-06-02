@@ -18,6 +18,7 @@ public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
 	public BPlusTreeP(String filename, int keyId, Column[] columns) throws IOException {
 		info = new BPlusTreeInfo(filename, keyId, columns, columns[keyId].getMaxLength());
 		root = new BPlusTreeLeafNodeP(info, 0);
+		root.write();
 		//info.cache.put(root.pageId, root);
 	}
 
@@ -32,12 +33,11 @@ public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
 ////		else{
 ////			root = new BPlusTreeInternalNodeP(info.rootPage, info);
 ////		}
-
 	}
 
 	public void close() throws IOException {
-		this.info.write();
-		this.info.writeCache();
+//		this.info.write();
+//		this.info.writeCache();
 		this.info.close();
 	}
 
