@@ -126,6 +126,8 @@ public class Manager {
     return new ArrayList<>(this.databaseNames);
   }
 
+  public boolean isDBExists(String dbName) { return this.databaseNames.contains(dbName);}
+
   private static class ManagerHolder {
     private static Manager INSTANCE;
 

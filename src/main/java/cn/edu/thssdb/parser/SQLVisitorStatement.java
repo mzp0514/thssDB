@@ -50,12 +50,34 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
     @Override
     public QueryResult visitCreate_db_stmt(SQLParser.Create_db_stmtContext ctx) {
-        return null;
+        if (this.db.txManager.getTransactionState(this.sessionID)) {
+            return new QueryResult(String.format("Create failed, transaction mode does not support this statement"));
+        }
+        String dbName = ctx.database_name().getText().toLowerCase();
+        if (Manager.getInstance().isDBExists(dbName))
+            return new QueryResult(String.format("Create failed, database %s already exists", dbName));
+        try {
+            Manager.getInstance().createDatabaseIfNotExists(dbName);
+        } catch (Exception e) {
+            return new QueryResult("Create Database Failed: " + e.getMessage());
+        }
+        return new QueryResult(String.format("Create database %s successfully", dbName));
     }
 
     @Override
     public QueryResult visitDrop_db_stmt(SQLParser.Drop_db_stmtContext ctx) {
-        return null;
+        if (this.db.txManager.getTransactionState(this.sessionID)) {
+            return new QueryResult(String.format("Delete failed, transaction mode does not support this statement"));
+        }
+        String dbName = ctx.database_name().getText().toLowerCase();
+        if (!Manager.getInstance().isDBExists(dbName))
+            return new QueryResult(String.format("Delete failed, database %s not exists", dbName));
+        try {
+            Manager.getInstance().deleteDatabase(dbName);
+        } catch (Exception e) {
+            return new QueryResult("Delete Database Failed: " + e.getMessage());
+        }
+        return new QueryResult(String.format("Delete database %s successfully", dbName));
     }
 
     @Override
