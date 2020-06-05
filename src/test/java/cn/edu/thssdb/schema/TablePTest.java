@@ -55,12 +55,13 @@ public class TablePTest {
 		entries[1] = new Entry("mzp");
 		entries[2] = new Entry("73");
 
-		for(int i = 0; i < 10000; i++){
+		for(int i = 0; i < 5000; i++){
 			entries[0] = new Entry(i);
 			entries[3] = new Entry((double)i);
 			entries[4] = new Entry((double)i);
 			Row row = new Row(entries);
 			table.insert(row);
+
 		}
 		table.close();
 

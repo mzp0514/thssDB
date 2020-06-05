@@ -36,8 +36,8 @@ public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
 	}
 
 	public void close() throws IOException {
-		this.info.write();
-		this.info.writeCache();
+//		this.info.write();
+//		this.info.writeCache();
 		this.info.close();
 	}
 

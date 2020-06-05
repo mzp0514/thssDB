@@ -83,6 +83,10 @@ public class Table implements Iterable<Row> {
 		// TODO
 		ArrayList<Entry> entries = row.getEntries();
 		this.index.put(entries.get(this.primaryKey), row);
+		//this.serialize();
+	}
+
+	public void consist() throws IOException {
 		this.serialize();
 	}
 

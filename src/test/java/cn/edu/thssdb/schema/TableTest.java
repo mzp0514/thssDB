@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 public class TableTest {
 
 	private Table table;
-
+	private  Column[] columns;
 	private ArrayList<Row> rows;
 
 	@Before
@@ -29,9 +29,19 @@ public class TableTest {
 		columns[2] = new Column("class", ColumnType.STRING, 0, true , 2);
 		columns[3] = new Column("height", ColumnType.FLOAT, 0, true , 0);
 		columns[4] = new Column("weight", ColumnType.DOUBLE, 0, true , 0);
-		this.table = new Table("dbtest", "tb", columns);
-
-		this.rows = new ArrayList<>();
+		this.columns = columns;
+		Entry[] entries = new Entry[5];
+		entries[0] = new Entry(0);
+		entries[1] = new Entry("mzp");
+		entries[2] = new Entry("73");
+		rows = new ArrayList<>();
+		for(int i = 0; i < 100000; i++){
+			entries[0] = new Entry(i);
+			entries[3] = new Entry((double)i);
+			entries[4] = new Entry((double)i);
+			Row row = new Row(entries);
+			rows.add(row);
+		}
 	}
 
 	@Test
@@ -43,19 +53,13 @@ public class TableTest {
 
 	@Test
 	public void insertTest() throws IOException {
-		Entry[] entries = new Entry[5];
-		entries[0] = new Entry(0);
-		entries[1] = new Entry("mzp");
-		entries[2] = new Entry("73");
+		this.table = new Table("dbtest", "tb", columns);
 
-		for(int i = 0; i < 1000; i++){
-			entries[0] = new Entry(i);
-			entries[3] = new Entry((double)i);
-			entries[4] = new Entry((double)i);
-			Row row = new Row(entries);
-			table.insert(row);
-			rows.add(row);
+		for (Row r : rows)
+		{
+			table.insert(r);
 		}
+		table.consist();
 
 	}
 
@@ -96,8 +100,9 @@ public class TableTest {
 	}
 
 	@Test
-	public void selectTest2() throws IOException {
-		insertTest();
+	public void selectTest2() throws IOException, ClassNotFoundException {
+		this.table = new Table("dbtest", "tb");
+		System.out.println(this.table.index.size());
 		ArrayList<Row> res1 = table.select("id", 100, ComparisonType.NEQUAL);
 
 		ArrayList<Row> res2 = new ArrayList<>();
