@@ -152,10 +152,8 @@ public class BPlusTreeLeafNodeP extends BPlusTreeNodeP{
 	Pair<Integer, Entry> split() throws IOException {
 		int from = (size() + 1) / 2;
 		int to = size();
-		BPlusTreeLeafNodeP newSiblingNode = (BPlusTreeLeafNodeP) info.cache.get(to - from);
-		if(newSiblingNode == null) {
-			newSiblingNode = new BPlusTreeLeafNodeP(info, to - from);
-		}
+		BPlusTreeLeafNodeP newSiblingNode = new BPlusTreeLeafNodeP(info, to - from);
+
 			//info.cache.put(to - from, newSiblingNode);
 		for (int i = 0; i < to - from; i++) {
 			newSiblingNode.keys.set(i, keys.get(i + from));
@@ -182,6 +180,7 @@ public class BPlusTreeLeafNodeP extends BPlusTreeNodeP{
 		nodeSize = index + length;
 		nextPage = node.nextPage;
 		info.freePages.add(node.pageId);
+		info.cache.remove(node.pageId);
 		//info.write();
 	}
 }

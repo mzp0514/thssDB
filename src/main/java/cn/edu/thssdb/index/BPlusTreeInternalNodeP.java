@@ -181,11 +181,8 @@ public final class BPlusTreeInternalNodeP extends BPlusTreeNodeP {
 	Pair<Integer, Entry> split() throws IOException {
 		int from = size() / 2 + 1;
 		int to = size();
-		BPlusTreeInternalNodeP newSiblingNode = (BPlusTreeInternalNodeP) info.cache.get(to - from);
-		if(newSiblingNode == null){
-			newSiblingNode = new BPlusTreeInternalNodeP(info, to - from);
-			//info.cache.put(to - from, newSiblingNode);
-		}
+		BPlusTreeInternalNodeP newSiblingNode = new BPlusTreeInternalNodeP(info, to - from);
+
 		for (int i = 0; i < to - from; i++) {
 			newSiblingNode.keys.set(i, keys.get(i + from));
 			newSiblingNode.children.set(i, children.get(i + from));
@@ -209,6 +206,7 @@ public final class BPlusTreeInternalNodeP extends BPlusTreeNodeP {
 		children.set(length + index + 1, node.children.get(length));
 		nodeSize = index + length + 1;
 		info.freePages.add(node.pageId);
+		info.cache.remove(node.pageId);
 //		info.write();
 	}
 
