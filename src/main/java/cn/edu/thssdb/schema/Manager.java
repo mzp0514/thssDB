@@ -80,15 +80,20 @@ public class Manager {
     persist();
   }
 
-  public void switchDatabase(String dbName) throws IOException, ClassNotFoundException {
+  public Database switchDatabase(String dbName, long sessionID) throws IOException, ClassNotFoundException {
     // TODO
-    if (dbName.equals(this.curDBName))
-      throw new XDBException("Error: The chosen database is already loaded!");
     if (!this.databaseNames.contains(dbName))
       throw new DBNotFoundException(dbName);
-    this.curDB.quit();
-    this.curDB = new Database(dbName);
-    this.curDBName = dbName;
+    Database db;
+    if (!this.cachedDB.containsKey(dbName))
+    {
+      db = new Database(dbName);
+      this.cachedDB.put(dbName, db);
+    }
+    else
+      db = this.cachedDB.get(dbName);
+    this.sessionDBMap.put(sessionID, dbName);
+    return db;
   }
 
 

@@ -259,7 +259,21 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
     @Override
     public QueryResult visitUse_db_stmt(SQLParser.Use_db_stmtContext ctx) {
-        return null;
+        //TODO: 切换数据库时原数据库的txManager处理
+        if (this.db.txManager.getTransactionState(this.sessionID)) {
+            return new QueryResult(String.format("Switch database failed, transaction mode does not support this statement"));
+        }
+        String dbName = ctx.database_name().getText().toLowerCase();
+        if (!Manager.getInstance().isDBExists(dbName))
+            return new QueryResult(String.format("Switch database failed, database %s not exists", dbName));
+        try {
+         this.db = Manager.getInstance().switchDatabase(dbName, sessionID);
+         this.db.txManager.insertSession(sessionID);
+        } catch (Exception e) {
+            return new QueryResult("Switch Database Failed: " + e.getMessage());
+        }
+        return new QueryResult(String.format("Switch to database %s successfully"));
+
     }
 
     public ComparisonType getComparisonType(String op){
