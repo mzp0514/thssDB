@@ -1,6 +1,7 @@
 package cn.edu.thssdb.client;
 
 import cn.edu.thssdb.rpc.thrift.*;
+import cn.edu.thssdb.schema.Manager;
 import cn.edu.thssdb.utils.Global;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -17,6 +18,7 @@ import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Scanner;
 
@@ -44,6 +46,14 @@ public class Client {
   private static long sessionID;
 
   public static void main(String[] args) {
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      try {
+        disConnect(sessionID);
+        logger.info("Disconnected");
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }));
     commandLine = parseCmd(args);
     if (commandLine.hasOption(HELP_ARGS)) {
       showHelp();
@@ -178,6 +188,9 @@ public class Client {
       print(status.getMsg());
     } catch (TException e) {
       logger.error(e.getMessage());
+    }
+    finally {
+      transport.close();
     }
   }
 
