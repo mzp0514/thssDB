@@ -65,21 +65,21 @@ public class ManagerTest {
         assertFalse(list.contains("tb"));
     }
 
-    @Test
-    public void switchDBTest() throws IOException, ClassNotFoundException {
-        String dname = "PUBLIC";
-        String nname = "dbtest";
-        manager = new Manager();
-        curDBName = manager.getCurDBName();
-        curDB = manager.getCurDB();
-        assertEquals(curDBName, dname);
-        assertEquals(curDB.getDatabaseName(), dname);
-        manager.switchDatabase("dbtest");
-        curDBName = manager.getCurDBName();
-        curDB = manager.getCurDB();
-        assertEquals(curDBName, nname);
-        assertEquals(curDB.getDatabaseName(), nname);
-
-    }
+//    @Test
+//    public void switchDBTest() throws IOException, ClassNotFoundException {
+//        String dname = "PUBLIC";
+//        String nname = "dbtest";
+//        manager = new Manager();
+//        curDBName = manager.getCurDBName();
+//        curDB = manager.getCurDB();
+//        assertEquals(curDBName, dname);
+//        assertEquals(curDB.getDatabaseName(), dname);
+//        manager.switchDatabase("dbtest");
+//        curDBName = manager.getCurDBName();
+//        curDB = manager.getCurDB();
+//        assertEquals(curDBName, nname);
+//        assertEquals(curDB.getDatabaseName(), nname);
+//
+//    }
 
 }
