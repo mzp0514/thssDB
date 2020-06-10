@@ -181,9 +181,9 @@ public class Client {
   }
 
   private static void disConnect(long sessionID) {
-    DisconnetReq req = new DisconnetReq(sessionID);
+    DisconnectReq req = new DisconnectReq(sessionID);
     try {
-      DisconnetResp resp = client.disconnect(req);
+      DisconnectResp resp = client.disconnect(req);
       Status status = resp.getStatus();
       print(status.getMsg());
     } catch (TException e) {
