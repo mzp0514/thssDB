@@ -328,6 +328,18 @@ public class SQLBaseListener implements SQLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterCheckpoint_stmt(SQLParser.Checkpoint_stmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCheckpoint_stmt(SQLParser.Checkpoint_stmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterColumn_def(SQLParser.Column_defContext ctx) { }
 	/**
 	 * {@inheritDoc}
