@@ -95,7 +95,7 @@ public class Client {
                 connect(username, password);
                 break;
             }
-            else if (Global.STATEMENT_PREFIX.contains(prefix))
+            else if (Global.STATEMENT_PREFIX.contains(prefix.toLowerCase()))
             {
               executeStatement(sessionID, command);
               break;
