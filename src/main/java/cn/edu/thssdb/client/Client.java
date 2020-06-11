@@ -86,9 +86,8 @@ public class Client {
             {
               command = command.substring(0, msg.trim().length() - 1);
             }
-            command = command.toLowerCase();
             String prefix = command.split(" ")[0];
-            if (command.startsWith(Global.CONNECT_PREFIX) && command.split(" ").length == 3)
+            if (command.toLowerCase().startsWith(Global.CONNECT_PREFIX) && command.split(" ").length == 3)
             {
                 String[] strList = msg.trim().split(" ");
                 String username = strList[1];
