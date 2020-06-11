@@ -62,7 +62,7 @@ public class TableP implements Iterable<Row> {
 
 		metaSerialize();
 
-		index = new BPlusTreeP(this.filePath + this.tableName + "index", primaryKey, columns);
+		index = new BPlusTreeP(this.filePath + this.tableName + ".index", primaryKey, columns);
 	}
 
 	public TableP(String databaseName, String tableName) throws IOException, ClassNotFoundException {
@@ -82,7 +82,7 @@ public class TableP implements Iterable<Row> {
 			this.metaDeserialize();
 		}
 
-		index = new BPlusTreeP(this.filePath + this.tableName + "index");
+		index = new BPlusTreeP(this.filePath + this.tableName + ".index");
 
 	}
 
