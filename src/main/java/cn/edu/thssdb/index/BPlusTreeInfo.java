@@ -123,6 +123,7 @@ public class BPlusTreeInfo {
 			BPlusTreeNodeP val = (BPlusTreeNodeP) entry.getValue();
 			val.write();
 		}
+		cache.clear();
 	}
 
 	int findFreePage() throws IOException {
