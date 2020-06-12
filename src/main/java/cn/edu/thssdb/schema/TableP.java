@@ -90,20 +90,18 @@ public class TableP implements Iterable<Row> {
 		this.index.close();
 	}
 
-	public void insert(Row row) throws IOException {
-		// TODO
+	public void insert(Row row) throws IOException{
 		ArrayList<Entry> entries = row.getEntries();
 
 		this.index.put(entries.get(this.primaryKey), row);
 
 	}
 
-	public void insert(ArrayList<Row> rows) throws IOException {
-		// TODO
-		for (Row row: rows) {
-			ArrayList<Entry> entries = row.getEntries();
+	public void insert(ArrayList<Row> rows)
+			throws IOException{
 
-			this.index.put(entries.get(this.primaryKey), row);
+		for (Row row: rows) {
+			insert(row);
 		}
 
 	}
@@ -118,7 +116,7 @@ public class TableP implements Iterable<Row> {
 	}
 
 	public void delete(ArrayList<Row> rows) throws IOException {
-		// TODO
+
 		for(Row row: rows) {
 			try {
 				this.index.remove(row.getEntries().get(this.primaryKey));
@@ -130,8 +128,9 @@ public class TableP implements Iterable<Row> {
 	}
 
 
-	public void update(ArrayList<Row> rows, String attrName, Object attrValue) throws IOException {
-		// TODO
+	public void update(ArrayList<Row> rows, String attrName, Object attrValue)
+			throws IOException{
+
 		ArrayList<Row> res = new ArrayList<>();
 		for(Row row : rows) {
 			int attrId = this.getAttrIndex(attrName);

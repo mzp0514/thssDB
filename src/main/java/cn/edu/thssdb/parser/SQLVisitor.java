@@ -167,6 +167,12 @@ public interface SQLVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitRollback_stmt(SQLParser.Rollback_stmtContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link SQLParser#checkpoint_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCheckpoint_stmt(SQLParser.Checkpoint_stmtContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link SQLParser#column_def}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
