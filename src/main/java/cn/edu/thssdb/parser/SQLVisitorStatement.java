@@ -521,6 +521,8 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                                     text = text.substring(1, text.length() - 1);
                                     if (text.length() > allCol.get(i).getMaxLength())
                                         return new QueryResult(String.format("Insert Error: String Length Out of Bound for Column %s", allColNames.get(i)));
+                                    if (text.length() == 0)
+                                        return new QueryResult(String.format("Insert Error: Field %s can not be null", allColNames.get(i)));
                                     int maxLength = allCol.get(i).getMaxLength();
                                     entries[i] = new Entry(Global.resize(text, maxLength));
                                     break;
