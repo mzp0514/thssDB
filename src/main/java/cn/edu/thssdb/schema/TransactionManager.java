@@ -69,7 +69,7 @@ public class TransactionManager {
     public void persistTable(long sessionID) throws IOException, ClassNotFoundException {
         for (String id : this.db.getTableNames()) {
             TableP table = this.db.getTable(id);
-            if (table != null && table.currentSessionID == sessionID) {
+            if (table != null) {
                 table.persist();
                 table.currentSessionID = -1;
             }

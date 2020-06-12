@@ -145,6 +145,30 @@ public class BPlusTreeInfo {
 		if(pos != -1)
 			indexFile.seek(pos);
 
+		if(a == null){
+			int len = 0;
+			switch (type){
+				case INT:
+					len = 4;
+					break;
+				case STRING:
+					len = stringMaxLen;
+					break;
+				case LONG:
+					len = 8;
+					break;
+				case DOUBLE:
+					len = 8;
+					break;
+				case FLOAT:
+					len = 4;
+					break;
+			}
+			byte[] bytes = new byte[len];
+			indexFile.write(bytes);
+			//indexFile.skipBytes(len);
+			return;
+		}
 		switch (type){
 			case INT:
 				indexFile.writeInt((Integer) a);
@@ -152,7 +176,6 @@ public class BPlusTreeInfo {
 			case STRING:
 				byte[] bytes = ((String) a).getBytes();
 				indexFile.write(bytes);
-				indexFile.skipBytes(stringMaxLen - bytes.length);
 				break;
 			case LONG:
 				indexFile.writeLong((Long) a);

@@ -19,12 +19,12 @@ public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
 		info = new BPlusTreeInfo(filename, keyId, columns, columns[keyId].getMaxLength());
 		root = new BPlusTreeLeafNodeP(info, 0);
 		root.write();
-		//info.cache.put(root.pageId, root);
 	}
 
 	public BPlusTreeP(String filename) throws IOException, ClassNotFoundException {
 		info = new BPlusTreeInfo(filename);
 		root = page2instance(info.rootPage);
+
 //		int type = info.readNodeType(info.rootPage);
 ////
 ////		if(type == BPlusNodeType.LEAF.ordinal()){
@@ -43,6 +43,9 @@ public final class BPlusTreeP implements Iterable<Pair<Entry, Row>> {
 	public void persist() throws IOException {
 		this.info.write();
 		this.info.writeCache();
+		if(!this.info.cache.containsKey(this.root.pageId)){
+			this.root.write();
+		}
 	}
 
 	public Row get(Entry key) throws IOException {
