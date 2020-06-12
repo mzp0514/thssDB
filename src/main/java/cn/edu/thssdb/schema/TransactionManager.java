@@ -46,12 +46,6 @@ public class TransactionManager {
     public synchronized void commitTransaction(long sessionID) {
         if (sessionsStatus.get(sessionID)) {
             sessionsStatus.put(sessionID, false);
-
-            try {
-                persist(sessionID);
-            } catch (Exception e) {
-                throw new TransactionFailedException();
-            }
         } else {
             throw new TransactionDeclareDuplicateException();
         }
@@ -72,7 +66,7 @@ public class TransactionManager {
         }
     }
 
-    private void persist(long sessionID) throws IOException, ClassNotFoundException {
+    public void persistTable(long sessionID) throws IOException, ClassNotFoundException {
         for (String id : this.db.getTableNames()) {
             TableP table = this.db.getTable(id);
             if (table != null && table.currentSessionID == sessionID) {
@@ -105,7 +99,7 @@ public class TransactionManager {
                     }
                 }
 
-                table.persist();
+                //table.persist();
                 table.currentSessionID = -1;
             }
         }

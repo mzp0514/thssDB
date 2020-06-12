@@ -85,6 +85,7 @@ public class IServiceHandler implements IService.Iface {
       logger.info("Statement: " + statement + " received, ready to parse");
 
       try {
+        manager.getCurDB().setCurrentStatement(statement);
         SQLLexer lexer = new SQLLexer(CharStreams.fromString(statement));
         lexer.removeErrorListeners();
         lexer.addErrorListener(new ParseErrorListener());

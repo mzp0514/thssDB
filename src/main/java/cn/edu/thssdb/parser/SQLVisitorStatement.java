@@ -259,7 +259,6 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
 
     @Override
     public QueryResult visitUse_db_stmt(SQLParser.Use_db_stmtContext ctx) {
-        //TODO: 切换数据库时原数据库的txManager处理
         if (this.db.txManager.getTransactionState(this.sessionID)) {
             return new QueryResult(String.format("Switch database failed, transaction mode does not support this statement"));
         }
@@ -267,8 +266,11 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
         if (!Manager.getInstance().isDBExists(dbName))
             return new QueryResult(String.format("Switch database failed, database %s not exists", dbName));
         try {
-         this.db = Manager.getInstance().switchDatabase(dbName, sessionID);
-         this.db.txManager.insertSession(sessionID);
+            //切换数据库时原数据库的数据表持久化处理
+            this.db.txManager.persistTable(this.sessionID);
+
+            this.db = Manager.getInstance().switchDatabase(dbName, sessionID);
+            this.db.txManager.insertSession(sessionID);
         } catch (Exception e) {
             return new QueryResult("Switch Database Failed: " + e.getMessage());
         }
@@ -367,8 +369,10 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                     if (this.db.txManager.getTransactionState(this.sessionID)) {
                         table.rowsForActions.push(rowsToDelete);
                         table.actionType.push(Global.STATE_TYPE.DELETE);
+                        this.db.walManager.addStatement(this.db.getCurrentStatement());
                     } else {
-                        table.persist();
+                        //table.persist();
+                        this.db.walManager.persist(this.db.getCurrentStatement());
                         table.currentSessionID = -1;
                     }
                     return new QueryResult(String.format("Delete %d row(s) successfully", rowsToDelete.size()));
@@ -538,8 +542,10 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                 if (this.db.txManager.getTransactionState(this.sessionID)) {
                     table.rowsForActions.push(rowsN);
                     table.actionType.push(Global.STATE_TYPE.INSERT);
+                    this.db.walManager.addStatement(this.db.getCurrentStatement());
                 } else {
-                    table.persist();
+                    //table.persist();
+                    this.db.walManager.persist(this.db.getCurrentStatement());
                     table.currentSessionID = -1;
                 }
                 return new QueryResult(String.format("Insert %d row(s) successfully", rowsToInsert.size()));
@@ -929,8 +935,10 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                     if (this.db.txManager.getTransactionState(this.sessionID)) {
                         table.rowsForActions.push(rowsToUpdate);
                         table.actionType.push(Global.STATE_TYPE.UPDATE);
+                        this.db.walManager.addStatement(this.db.getCurrentStatement());
                     } else {
-                        table.persist();
+                        //table.persist();
+                        this.db.walManager.persist(this.db.getCurrentStatement());
                         table.currentSessionID = -1;
                     }
                     return new QueryResult(String.format("Update %d row(s) successfully", rowsToUpdate.size()));
@@ -959,13 +967,32 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
     @Override
     public QueryResult visitCommit_stmt(SQLParser.Commit_stmtContext ctx){
         this.db.txManager.commitTransaction(this.sessionID);
+        try {
+            this.db.walManager.persist();
+        } catch (Exception e) {
+            return new QueryResult("Commit failed, " + e.getMessage());
+        }
         return new QueryResult("Commit succeed");
     }
 
     @Override
     public QueryResult visitRollback_stmt(SQLParser.Rollback_stmtContext ctx){
         this.db.txManager.rollbackTransaction(this.sessionID);
+        this.db.walManager.rollBackClearStatement();
         return new QueryResult("Rollback succeed");
+    }
+
+    @Override
+    public QueryResult visitCheckpoint_stmt(SQLParser.Checkpoint_stmtContext ctx){
+        //TODO
+        try {
+            this.db.txManager.persistTable(this.sessionID);
+            this.db.walManager.clearLog();
+        } catch (Exception e){
+            return new QueryResult("Persist Failed: " + e.getMessage());
+        }
+
+        return new QueryResult("Persist succeed");
     }
 
     @Override

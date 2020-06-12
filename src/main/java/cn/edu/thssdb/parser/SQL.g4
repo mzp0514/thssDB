@@ -28,7 +28,8 @@ sql_stmt :
     | update_stmt
     | begin_transaction_stmt
     | commit_stmt
-    | rollback_stmt;
+    | rollback_stmt
+    | checkpoint_stmt;
 
 create_db_stmt :
     K_CREATE K_DATABASE database_name ;
@@ -102,6 +103,9 @@ commit_stmt :
 
 rollback_stmt :
     K_ROLLBACK K_TRANSACTION;
+
+checkpoint_stmt :
+    K_CHECKPOINT;
 
 column_def :
     column_name type_name column_constraint* ;
@@ -206,6 +210,7 @@ K_ALL : A L L;
 K_AS : A S;
 K_BEGIN : B E G I N;
 K_BY : B Y;
+K_CHECKPOINT : C H E C K P O I N T;
 K_COLUMN : C O L U M N;
 K_COMMIT : C O M M I T;
 K_CREATE : C R E A T E;

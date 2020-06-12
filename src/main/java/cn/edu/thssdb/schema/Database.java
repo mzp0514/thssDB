@@ -32,7 +32,9 @@ public class Database {
   private File dbDir;
   private File dbMeta;
   private Timestamp lastModifyTimeStamp;
+  private String currentStatement;
   public TransactionManager txManager;
+  public WALManager walManager;
   ReentrantReadWriteLock lock;
 
   public Database(String name) throws IOException, ClassNotFoundException {
@@ -44,6 +46,7 @@ public class Database {
     this.dbMeta = new File(this.filePath + this.databaseName + ".dbmeta");
     this.lock = new ReentrantReadWriteLock();
     this.txManager = new TransactionManager(this);
+    this.walManager = new WALManager(this, this.filePath);
     recover();
     persist();
   }
@@ -160,13 +163,15 @@ public class Database {
     else
       throw new FileStructureException(this.databaseName);
 
-
+    this.txManager.insertSession(this.walManager.getSessionID());
+    this.walManager.recover();
   }
 
   public void quit() throws IOException {
     // TODO
     for (TableP tb : this.tables.values())
       tb.close();
+    this.walManager.clearLog();
     this.tables.clear();
     persist();
   }
@@ -194,5 +199,9 @@ public class Database {
   public String getDatabaseName() {return databaseName;}
 
   public boolean tableInDB(String tbName) {return this.tableNames.contains(tbName);}
+
+  public String getCurrentStatement() { return this.currentStatement; }
+
+  public void setCurrentStatement(String statement) {this.currentStatement = statement;}
 
 }
