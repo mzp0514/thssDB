@@ -369,10 +369,10 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                     if (this.db.txManager.getTransactionState(this.sessionID)) {
                         table.rowsForActions.push(rowsToDelete);
                         table.actionType.push(Global.STATE_TYPE.DELETE);
-                        this.db.walManager.addStatement(ctx.toString());
+                        this.db.walManager.addStatement(this.db.getCurrentStatement());
                     } else {
                         //table.persist();
-                        this.db.walManager.persist(ctx.toString());
+                        this.db.walManager.persist(this.db.getCurrentStatement());
                         table.currentSessionID = -1;
                     }
                     return new QueryResult(String.format("Delete %d row(s) successfully", rowsToDelete.size()));
@@ -542,10 +542,10 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                 if (this.db.txManager.getTransactionState(this.sessionID)) {
                     table.rowsForActions.push(rowsN);
                     table.actionType.push(Global.STATE_TYPE.INSERT);
-                    this.db.walManager.addStatement(ctx.toString());
+                    this.db.walManager.addStatement(this.db.getCurrentStatement());
                 } else {
                     //table.persist();
-                    this.db.walManager.persist(ctx.toString());
+                    this.db.walManager.persist(this.db.getCurrentStatement());
                     table.currentSessionID = -1;
                 }
                 return new QueryResult(String.format("Insert %d row(s) successfully", rowsToInsert.size()));
@@ -935,10 +935,10 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                     if (this.db.txManager.getTransactionState(this.sessionID)) {
                         table.rowsForActions.push(rowsToUpdate);
                         table.actionType.push(Global.STATE_TYPE.UPDATE);
-                        this.db.walManager.addStatement(ctx.toString());
+                        this.db.walManager.addStatement(this.db.getCurrentStatement());
                     } else {
                         //table.persist();
-                        this.db.walManager.persist(ctx.toString());
+                        this.db.walManager.persist(this.db.getCurrentStatement());
                         table.currentSessionID = -1;
                     }
                     return new QueryResult(String.format("Update %d row(s) successfully", rowsToUpdate.size()));
@@ -987,6 +987,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
         //TODO
         try {
             this.db.txManager.persistTable(this.sessionID);
+            this.db.walManager.clearLog();
         } catch (Exception e){
             return new QueryResult("Persist Failed: " + e.getMessage());
         }

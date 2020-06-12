@@ -32,6 +32,7 @@ public class Database {
   private File dbDir;
   private File dbMeta;
   private Timestamp lastModifyTimeStamp;
+  private String currentStatement;
   public TransactionManager txManager;
   public WALManager walManager;
   ReentrantReadWriteLock lock;
@@ -162,6 +163,7 @@ public class Database {
     else
       throw new FileStructureException(this.databaseName);
 
+    this.txManager.insertSession(this.walManager.getSessionID());
     this.walManager.recover();
   }
 
@@ -197,5 +199,9 @@ public class Database {
   public String getDatabaseName() {return databaseName;}
 
   public boolean tableInDB(String tbName) {return this.tableNames.contains(tbName);}
+
+  public String getCurrentStatement() { return this.currentStatement; }
+
+  public void setCurrentStatement(String statement) {this.currentStatement = statement;}
 
 }

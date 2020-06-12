@@ -45,7 +45,13 @@ public class WALManager {
         if (this.dbLog.exists() && this.dbLog.isFile()){
             DBLog log;
             this.lock.readLock().lock();
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(this.dbLog));
+            FileInputStream fs = new FileInputStream(this.dbLog);
+            if (fs.available() == 0) {
+                this.lock.readLock().unlock();
+                return;
+            }
+
+            ObjectInputStream ois = new ObjectInputStream(fs);
             log = (DBLog) ois.readObject();
             ois.close();
             this.lock.readLock().unlock();
@@ -73,7 +79,7 @@ public class WALManager {
         } else {
             this.lock.writeLock().lock();
             this.dbLog.createNewFile();
-            this.lock.writeLock().lock();
+            this.lock.writeLock().unlock();
         }
     }
 
@@ -96,7 +102,7 @@ public class WALManager {
         fs.close();
 
         this.statements.clear();
-        this.lock.writeLock().lock();
+        this.lock.writeLock().unlock();
     }
 
     public void persist(String statement) throws IOException {
@@ -111,7 +117,7 @@ public class WALManager {
         fs.close();
 
         this.statements.clear();
-        this.lock.writeLock().lock();
+        this.lock.writeLock().unlock();
     }
 
     public void clearLog() throws IOException {
@@ -125,5 +131,7 @@ public class WALManager {
     public void rollBackClearStatement() {
         this.statements.clear();
     }
+
+    public int getSessionID() {return this.sessionID;}
 
 }
