@@ -46,6 +46,17 @@ public class TransactionManager {
     public synchronized void commitTransaction(long sessionID) {
         if (sessionsStatus.get(sessionID)) {
             sessionsStatus.put(sessionID, false);
+            try {
+                for (String id : this.db.getTableNames()) {
+                    TableP table = this.db.getTable(id);
+                    if (table != null) {
+                        table.currentSessionID = -1;
+                    }
+                }
+            } catch (Exception e) {
+                throw new TransactionFailedException();
+            }
+
         } else {
             throw new TransactionDeclareDuplicateException();
         }
