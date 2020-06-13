@@ -8,6 +8,7 @@ import cn.edu.thssdb.type.ColumnType;
 import cn.edu.thssdb.utils.Global;
 import javafx.util.Pair;
 
+import javax.xml.bind.annotation.XmlElementDecl;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,23 +85,23 @@ public class BPlusTreeInfo {
 		for(Column col: columns){
 			switch (col.getType()){
 				case STRING:
-					leafDataSize += col.getMaxLength();
+					leafDataSize += col.getMaxLength() + Global.BYTE_SIZE;
 					break;
 
 				case INT:
-					leafDataSize += Global.INT_SIZE;
+					leafDataSize += Global.INT_SIZE + Global.BYTE_SIZE;
 					break;
 
 				case LONG:
-					leafDataSize += Global.LONG_SIZE;
+					leafDataSize += Global.LONG_SIZE + Global.BYTE_SIZE;
 					break;
 
 				case FLOAT:
-					leafDataSize += Global.FLOAT_SIZE;
+					leafDataSize += Global.FLOAT_SIZE + Global.BYTE_SIZE;
 					break;
 
 				case DOUBLE:
-					leafDataSize += Global.DOUBLE_SIZE;
+					leafDataSize += Global.DOUBLE_SIZE + Global.BYTE_SIZE;
 					break;
 			}
 		}
@@ -146,35 +147,40 @@ public class BPlusTreeInfo {
 			indexFile.seek(pos);
 
 		if(a == null){
+
 			int len = 0;
 			switch (type){
 				case INT:
-					len = 4;
+					len = Global.INT_SIZE;
 					break;
 				case STRING:
 					len = stringMaxLen;
 					break;
 				case LONG:
-					len = 8;
+					len = Global.LONG_SIZE;
 					break;
 				case DOUBLE:
-					len = 8;
+					len = Global.DOUBLE_SIZE;
 					break;
 				case FLOAT:
-					len = 4;
+					len = Global.FLOAT_SIZE;
 					break;
 			}
 			byte[] bytes = new byte[len];
 			indexFile.write(bytes);
-			//indexFile.skipBytes(len);
 			return;
 		}
+
 		switch (type){
 			case INT:
 				indexFile.writeInt((Integer) a);
 				break;
 			case STRING:
-				byte[] bytes = ((String) a).getBytes();
+				byte[] bytes = new byte[stringMaxLen];
+				byte[] bytes_t = ((String) a).getBytes();
+				for(int i = 0; i < bytes_t.length; i++){
+					bytes[i] = bytes_t[i];
+				}
 				indexFile.write(bytes);
 				break;
 			case LONG:
@@ -186,6 +192,9 @@ public class BPlusTreeInfo {
 			case FLOAT:
 				indexFile.writeFloat((Float) a);
 				break;
+			case BYTE:
+				indexFile.writeByte((Byte) a);
+				break;
 		}
 	}
 
@@ -195,26 +204,34 @@ public class BPlusTreeInfo {
 		if(pos != -1)
 			indexFile.seek(pos);
 
-
 		Object a = null;
 
 		switch (type){
 			case INT:
 				a = indexFile.readInt();
 				break;
+
 			case STRING:
 				byte[] b = new byte[stringMaxLen];
 				indexFile.read(b);
 				a = new String(b);
+				a = ((String) a).trim();
 				break;
+
 			case LONG:
 				a = indexFile.readLong();
 				break;
+
 			case DOUBLE:
 				a = indexFile.readDouble();
 				break;
+
 			case FLOAT:
 				a = indexFile.readFloat();
+				break;
+
+			case BYTE:
+				a = indexFile.readByte();
 				break;
 		}
 		return a;

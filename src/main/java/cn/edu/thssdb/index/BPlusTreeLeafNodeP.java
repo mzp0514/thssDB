@@ -60,9 +60,17 @@ public class BPlusTreeLeafNodeP extends BPlusTreeNodeP{
 			info.writeIndex(keys.get(i).value, info.keyType, -1, info.columns[info.keyId].getMaxLength());
 			ArrayList<Entry> entries = values.get(i).getEntries();
 			for(int j = 0; j < info.columns.length; j++) {
-				info.writeIndex(entries.get(j).value, info.columns[j].getType(), -1, info.columns[j].getMaxLength());
+				Object a = entries.get(j).value;
+				info.writeIndex(a, info.columns[j].getType(), -1, info.columns[j].getMaxLength());
+				byte isNull = 0;
+				if(a == null){
+					isNull = 1;
+				}
+				info.writeIndex(isNull, ColumnType.BYTE, -1, -1);
 			}
+
 		}
+
 	}
 
 	@Override
@@ -79,8 +87,16 @@ public class BPlusTreeLeafNodeP extends BPlusTreeNodeP{
 			Entry[] entries = new Entry[len];
 			for(int j = 0; j < len; j++){
 				Object tmp = info.readIndex(info.columns[j].getType(), -1, info.columns[j].getMaxLength());
-				entries[j] = new Entry((Comparable) tmp);
+				Object isNull = info.readIndex(ColumnType.BYTE, -1, -1);
+				byte b = 0;
+				if(isNull.equals(b)){
+					entries[j] = new Entry((Comparable) tmp);
+				}else{
+					entries[j] = new Entry(null);
+				}
+
 			}
+
 			values.set(i, new Row(entries));
 		}
 	}

@@ -29,6 +29,7 @@ public class Global {
   public static int LONG_SIZE = 8;
   public static int DOUBLE_SIZE = 8;
   public static int FLOAT_SIZE = 4;
+  public static int BYTE_SIZE = 1;
 
   public static final String S_URL_INTERNAL = "jdbc:default:connection";
 

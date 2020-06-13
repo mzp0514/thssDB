@@ -350,7 +350,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                                 int maxLength = allCol.get(loc).getMaxLength();
                                 if (text.length() > maxLength)
                                     return new QueryResult(String.format("Insert Error: String Length Out of Bound for Column %s", allCol.get(loc).getName()));
-                                attrValue = Global.resize(text, maxLength);
+                                attrValue = text;
                                 break;
                         }
                     }
@@ -526,7 +526,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                                     if (text.length() > allCol.get(i).getMaxLength())
                                         return new QueryResult(String.format("Insert Error: String Length Out of Bound for Column %s", allColNames.get(i)));
                                     int maxLength = allCol.get(i).getMaxLength();
-                                    entries[i] = new Entry(Global.resize(text, maxLength));
+                                    entries[i] = new Entry(text);
                                     break;
                                 default:
                                     break;
@@ -654,7 +654,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                                     int maxLength = allCol.get(loc).getMaxLength();
                                     if (text.length() > maxLength)
                                         return new QueryResult(String.format("Insert Error: String Length Out of Bound for Column %s", allCol.get(loc).getName()));
-                                    attrValue = Global.resize(text, maxLength);
+                                    attrValue = text;
                                     break;
                             }
                         }
@@ -698,7 +698,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                                     int maxLength = allCol.get(loc).getMaxLength();
                                     if (text.length() > maxLength)
                                         return new QueryResult(String.format("Insert Error: String Length Out of Bound for Column %s", allCol.get(loc).getName()));
-                                    attrValue = Global.resize(text, maxLength);
+                                    attrValue = text;
                                     break;
                             }
                         }
@@ -784,7 +784,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                                     int maxLength = allCol.get(loc).getMaxLength();
                                     if (text.length() > maxLength)
                                         return new QueryResult(String.format("Insert Error: String Length Out of Bound for Column %s", allCol.get(loc).getName()));
-                                    attrValue = Global.resize(text, maxLength);
+                                    attrValue = text;
                                     break;
                             }
                         }
@@ -880,7 +880,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                             int maxLength = allCol.get(loc).getMaxLength();
                             if (text.length() > maxLength)
                                 return new QueryResult(String.format("Insert Error: String Length Out of Bound for Column %s", allCol.get(loc).getName()));
-                            attrValue = Global.resize(text, maxLength);
+                            attrValue = text;
                             break;
                     }
                 }
@@ -917,7 +917,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                                 int maxLength = allCol.get(loc).getMaxLength();
                                 if (text.length() > maxLength)
                                     return new QueryResult(String.format("Insert Error: String Length Out of Bound for Column %s", allCol.get(loc).getName()));
-                                queryValue = Global.resize(text, maxLength);
+                                queryValue = text;
                                 break;
                         }
                     }
