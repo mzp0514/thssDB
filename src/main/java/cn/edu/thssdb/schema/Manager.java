@@ -182,7 +182,7 @@ public class Manager {
       this.dbManagerDir.mkdir();
       this.dbManagerMeta.createNewFile();
       userInfo = new HashMap<>();
-      userInfo.put("admin", "admin");
+      userInfo.put("username", "password");
       if (!this.dbManagerDir.isDirectory() || !this.dbManagerMeta.isFile())
         throw new FileCreateFailedException();
     }

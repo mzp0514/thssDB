@@ -29,6 +29,7 @@ public class QueryResult {
   private TableP queryTable;
   private ArrayList<Integer> index_s;
   private ArrayList<String> attrs_s;
+  private ArrayList<Row> rowsToSelect;
 
   private String msg;
   public boolean isReturnValue;
@@ -36,6 +37,13 @@ public class QueryResult {
   public QueryResult(String msg) {
     this.msg = msg;
     this.isReturnValue = false;
+  }
+
+  public QueryResult(String msg, ArrayList<Row> rows) {
+    this.msg = msg;
+    this.isReturnValue = true;
+    this.rowsToSelect = new ArrayList<>();
+    this.rowsToSelect.addAll(rows);
   }
 
   public QueryResult(List<TableP> queryTables, List<String> select_columns,
@@ -262,5 +270,7 @@ public class QueryResult {
   }
 
   public String getMsg() {return this.msg;}
+
+  public ArrayList<Row> getRowsToSelect() {return this.rowsToSelect;}
 
 }

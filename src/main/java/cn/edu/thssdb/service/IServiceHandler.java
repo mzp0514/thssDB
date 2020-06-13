@@ -105,12 +105,16 @@ public class IServiceHandler implements IService.Iface {
       if (res.isReturnValue)
       {
         resp.setHasResult(true);
-        resp.addToColumnsList("A");
-        resp.addToColumnsList("B");
-        ArrayList<String> a = new ArrayList<>();
-        a.add("1");
-        a.add("2");
-        resp.addToRowList(a);
+//        resp.addToColumnsList("A");
+//        resp.addToColumnsList("B");
+        ArrayList<String> result = new ArrayList<>();
+        res.getRowsToSelect().forEach(it -> {
+          result.clear();
+          result.add(it.toString());
+          resp.addToRowList(result);
+        });
+
+        status.setMsg(res.getMsg());
         resp.setStatus(status);
       }
       else
