@@ -219,7 +219,8 @@ public class Manager {
   }
 
   public void close() throws IOException {
-    this.curDB.quit();
+    for(Database db : this.cachedDB.values())
+      db.quit();
   }
 }
 
