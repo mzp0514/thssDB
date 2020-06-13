@@ -158,9 +158,7 @@ public class Client {
             println(String.join("|", resp.columnsList));
           }
           if(resp.isSetRowList()){
-            for(int i = 0; i < resp.rowList.size(); i++){
-              println(String.join("|", resp.rowList.get(i)));
-            }
+            println(status.msg);
           }
         }
         else if (!resp.isHasResult())
