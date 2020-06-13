@@ -23,7 +23,7 @@ class ManagerMeta  implements Serializable {
 }
 
 public class Manager {
-  private static String defaultDB = "PUBLIC";
+  private static String defaultDB = "public";
   private String filePath;
   private HashSet<String> databaseNames;
   public HashMap<String, String> userInfo;
@@ -51,7 +51,6 @@ public class Manager {
     createDatabaseIfNotExists(defaultDB);
     this.curDB = new Database(defaultDB);
     this.curDBName = defaultDB;
-    this.databaseNames.add(defaultDB);
     this.cachedDB.put(defaultDB, this.curDB);
   }
 
