@@ -23,7 +23,7 @@ class ManagerMeta  implements Serializable {
 }
 
 public class Manager {
-  private static String defaultDB = "PUBLIC";
+  private static String defaultDB = "public";
   private String filePath;
   private HashSet<String> databaseNames;
   public HashMap<String, String> userInfo;
@@ -182,7 +182,7 @@ public class Manager {
       this.dbManagerDir.mkdir();
       this.dbManagerMeta.createNewFile();
       userInfo = new HashMap<>();
-      userInfo.put("admin", "admin");
+      userInfo.put("username", "password");
       if (!this.dbManagerDir.isDirectory() || !this.dbManagerMeta.isFile())
         throw new FileCreateFailedException();
     }

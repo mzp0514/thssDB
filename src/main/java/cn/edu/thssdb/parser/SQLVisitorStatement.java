@@ -723,7 +723,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                     result.add(it.toString());
                 });
                 result.add(String.format("Select totally %d row(s) successfully", rowsToSelect.size()));
-                return new QueryResult(result.toString());
+                return new QueryResult(result.toString(), rowsToSelect);
 
             } catch (Exception e){
                 return new QueryResult("Select Failed: " + e.getMessage());
@@ -808,7 +808,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                         result.add(it.toString());
                     });
                     result.add(String.format("Select totally %d row(s) successfully", rowsToSelect.size()));
-                    return new QueryResult(result.toString());
+                    return new QueryResult(result.toString(), rowsToSelect);
                 }
                 catch (Exception e){
                     return new QueryResult("Select Failed: " + e.getMessage());

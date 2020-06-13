@@ -70,7 +70,7 @@ public class WALManager {
                     res = visitor.visit(stmt);
                 } catch (Exception e) {
                     //TODO 抓取exception并显示
-
+                    int k = -1;
                 }
             }
             this.db.txManager.persistTable(this.sessionID);
