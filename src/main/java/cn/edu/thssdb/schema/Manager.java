@@ -51,6 +51,7 @@ public class Manager {
     createDatabaseIfNotExists(defaultDB);
     this.curDB = new Database(defaultDB);
     this.curDBName = defaultDB;
+    this.databaseNames.add(defaultDB);
     this.cachedDB.put(defaultDB, this.curDB);
   }
 
