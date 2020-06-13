@@ -18,7 +18,7 @@ public class Global {
   public static final String CONNECT_PREFIX = "connect";
 
   public static final ArrayList<String> STATEMENT_PREFIX = new ArrayList<String>(Arrays.asList("create", "drop", "insert", "delete", "update", "select", "show",
-          "begin", "commit", "rollback", "checkpoint"));
+          "begin", "commit", "rollback", "checkpoint", "use"));
 
   public enum STATE_TYPE { INSERT, UPDATE, DELETE }
 

@@ -73,7 +73,6 @@ public class IServiceHandler implements IService.Iface {
 
   @Override
   public ExecuteStatementResp executeStatement(ExecuteStatementReq req) throws TException {
-    // TODO
     ExecuteStatementResp resp = new ExecuteStatementResp();
     long sessionID = req.getSessionId();
     Manager manager = Manager.getInstance();
@@ -85,7 +84,7 @@ public class IServiceHandler implements IService.Iface {
       logger.info("Statement: " + statement + " received, ready to parse");
 
       try {
-        manager.getCurDB().setCurrentStatement(statement);
+        manager.getUserDB(sessionID).setCurrentStatement(statement);
         SQLLexer lexer = new SQLLexer(CharStreams.fromString(statement));
         lexer.removeErrorListeners();
         lexer.addErrorListener(new ParseErrorListener());
@@ -93,7 +92,7 @@ public class IServiceHandler implements IService.Iface {
         parser.removeErrorListeners();
         parser.addErrorListener(new ParseErrorListener());
         SQLParser.Sql_stmtContext stmt = parser.sql_stmt();
-        SQLVisitorStatement visitor = new SQLVisitorStatement(manager.getCurDB(), sessionID);
+        SQLVisitorStatement visitor = new SQLVisitorStatement(manager.getUserDB(sessionID), sessionID);
         res = visitor.visit(stmt);
       } catch (Exception e) {
         status.setCode(Global.FAILURE_CODE);

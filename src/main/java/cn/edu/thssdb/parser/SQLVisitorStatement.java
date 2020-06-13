@@ -274,7 +274,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
         } catch (Exception e) {
             return new QueryResult("Switch Database Failed: " + e.getMessage());
         }
-        return new QueryResult(String.format("Switch to database %s successfully"));
+        return new QueryResult(String.format("Switch to database %s successfully", dbName));
 
     }
 

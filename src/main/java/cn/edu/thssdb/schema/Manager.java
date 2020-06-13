@@ -2,6 +2,7 @@ package cn.edu.thssdb.schema;
 
 import cn.edu.thssdb.exception.*;
 
+import javax.xml.crypto.Data;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -125,6 +126,26 @@ public class Manager {
 
   public Database getCurDB() {
     return curDB;
+  }
+
+  public String getUserDBName(long sessionID) {
+    return this.sessionDBMap.get(sessionID);
+  }
+
+  public Database getUserDB(long sessionID) throws IOException, ClassNotFoundException {
+    String dbName = this.sessionDBMap.get(sessionID);
+    if (!this.databaseNames.contains(dbName))
+      throw new DBNotFoundException(dbName);
+    Database db;
+    if (!this.cachedDB.containsKey(dbName))
+    {
+      db = new Database(dbName);
+      this.cachedDB.put(dbName, db);
+    }
+    else
+      db = this.cachedDB.get(dbName);
+    return db;
+
   }
 
   public ArrayList<String> getDBNames() {
