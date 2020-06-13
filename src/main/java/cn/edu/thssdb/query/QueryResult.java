@@ -227,9 +227,11 @@ public class QueryResult {
       }
       else if(id1 != -1){
         attr = id1;
+        tb = 0;
       }
       else{
         attr = id2;
+        tb = 1;
       }
     }
     return new Pair<>(tb, attr);
