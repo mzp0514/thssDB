@@ -50,6 +50,7 @@ public class Client_test {
       createTable(sessionId);
       insertData(sessionId, insertStatements);
       queryData(sessionId);
+      checkpoint(sessionId);
       disconnect(sessionId);
 
       transport.close();
@@ -173,6 +174,17 @@ public class Client_test {
       }
     }
     println("It costs " + (System.currentTimeMillis() - startTime) + "ms.");
+  }
+
+  private static void checkpoint(long sessionId) throws TException {
+    String statement = "checkpoint;";
+    ExecuteStatementReq req = new ExecuteStatementReq(sessionId, statement);
+    ExecuteStatementResp resp = client.executeStatement(req);
+//    if (resp.getStatus().code == Global.SUCCESS_CODE) {
+//      println("checpoint Successfully!");
+//    } else {
+//      println("checkpoint Unsuccessfully!");
+//    }
   }
 
   private static void disconnect(long sessionId) throws TException {
