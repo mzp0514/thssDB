@@ -41,8 +41,8 @@ public class BPlusTreePTest {
 
 		Entry[] entries = new Entry[5];
 		entries[0] = new Entry(0);
-		entries[1] = new Entry(Global.resize("mzp", 10));
-		entries[2] = new Entry(Global.resize("73", 10));
+		entries[1] = new Entry("mzp");
+		entries[2] = new Entry("73");
 
 		for (int i = 0; i < 200; i++) {
 			entries[0] = new Entry(i);

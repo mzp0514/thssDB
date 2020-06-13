@@ -22,7 +22,7 @@ public class Global {
 
   public enum STATE_TYPE { INSERT, UPDATE, DELETE }
 
-  public static int PAGE_SIZE = 4096;
+  public static int PAGE_SIZE = 9216;
   public static int PAGE_HEADER_SIZE = 16;
 
   public static int INT_SIZE = 4;
@@ -32,14 +32,6 @@ public class Global {
   public static int BYTE_SIZE = 1;
 
   public static final String S_URL_INTERNAL = "jdbc:default:connection";
-
-  public static String resize(String s, int size){
-    byte[] bytes = s.getBytes();
-    for(int i = bytes.length; i < size; i++){
-      s += " ";
-    }
-    return s;
-  }
 
   public static int MAX_CACHED_TABLE_NUM = 12;
 
