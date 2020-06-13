@@ -586,6 +586,12 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                     return new QueryResult(String.format("Select Failed, Unknown table name: %s", tableName));
                 }
             }
+            for (TableP queryTable : queryTables) {
+                long ID = queryTable.currentSessionID;
+                if (ID != this.sessionID && ID != -1) {
+                    return new QueryResult("Select Failed: current tables are locked");
+                }
+            }
             try {
                 QueryResult mQuery;
 
@@ -738,6 +744,12 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                 TableP table;
                 try{
                     table = this.db.getTable(tableName);
+
+                    long ID = table.currentSessionID;
+                    if (ID != this.sessionID && ID != -1) {
+                        return new QueryResult("Select Failed: current table is locked");
+                    }
+
                     QueryResult mQuery;
                     ArrayList<Row> rowsToSelect;
 
