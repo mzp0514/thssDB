@@ -75,7 +75,11 @@ public class WALManager {
             }
             this.db.txManager.persistTable(this.sessionID);
 
-            clearLog();
+            boolean result = clearLog();
+            if (!result) {
+                //TODO 抓取exception并显示
+                clearLog();
+            }
         } else {
             this.lock.writeLock().lock();
             this.dbLog.createNewFile();
@@ -120,17 +124,15 @@ public class WALManager {
         this.lock.writeLock().unlock();
     }
 
-    public void clearLog() throws IOException {
+    public boolean clearLog() throws IOException {
         this.lock.writeLock().lock();
         this.statements.clear();
-        boolean flag = false;
-        while(!flag)
-        {
-            System.gc();
-            flag = this.dbLog.delete();
-        }
-        this.dbLog.createNewFile();
+        System.gc();
+        boolean result = this.dbLog.delete();
+        if (!result) return false;
+        result = this.dbLog.createNewFile();
         this.lock.writeLock().unlock();
+        return result;
     }
 
     public void rollBackClearStatement() {
