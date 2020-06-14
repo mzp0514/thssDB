@@ -1001,7 +1001,10 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
         //TODO
         try {
             this.db.txManager.persistTable(this.sessionID);
-            this.db.walManager.clearLog();
+            boolean result = this.db.walManager.clearLog();
+            if (!result) {
+                return new QueryResult("Persist Failed: clear file failed, may try again later");
+            }
         } catch (Exception e){
             return new QueryResult("Persist Failed: " + e.getMessage());
         }

@@ -171,7 +171,11 @@ public class Database {
     // TODO
     for (TableP tb : this.tables.values())
       tb.close();
-    this.walManager.clearLog();
+    boolean result = this.walManager.clearLog();
+    if (!result) {
+      //TODO 显示异常
+      this.walManager.clearLog();
+    }
     this.tables.clear();
     persist();
   }
