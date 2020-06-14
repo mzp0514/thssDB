@@ -127,9 +127,11 @@ public class WALManager {
     public boolean clearLog() throws IOException {
         this.lock.writeLock().lock();
         this.statements.clear();
-        System.gc();
-        boolean result = this.dbLog.delete();
-        if (!result) return false;
+        boolean result = false;
+        while(!result) {
+            System.gc();
+            result = this.dbLog.delete();
+        }
         result = this.dbLog.createNewFile();
         this.lock.writeLock().unlock();
         return result;
