@@ -547,7 +547,7 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
                     this.db.walManager.addStatement(this.db.getCurrentStatement());
                 } else {
                     //table.persist();
-                    this.db.walManager.persist(this.db.getCurrentStatement());
+                    //this.db.walManager.persist(this.db.getCurrentStatement());
                     table.currentSessionID = -1;
                 }
                 return new QueryResult(String.format("Insert %d row(s) successfully", rowsToInsert.size()));
@@ -1001,7 +1001,10 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
         //TODO
         try {
             this.db.txManager.persistTable(this.sessionID);
-            this.db.walManager.clearLog();
+            boolean result = this.db.walManager.clearLog();
+            if (!result) {
+                return new QueryResult("Persist Failed: clear file failed, may try again later");
+            }
         } catch (Exception e){
             return new QueryResult("Persist Failed: " + e.getMessage());
         }
