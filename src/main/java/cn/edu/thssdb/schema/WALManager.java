@@ -123,7 +123,12 @@ public class WALManager {
     public void clearLog() throws IOException {
         this.lock.writeLock().lock();
         this.statements.clear();
-        this.dbLog.delete();
+        boolean flag = false;
+        while(!flag)
+        {
+            System.gc();
+            flag = this.dbLog.delete();
+        }
         this.dbLog.createNewFile();
         this.lock.writeLock().unlock();
     }
