@@ -1000,8 +1000,14 @@ public class SQLVisitorStatement extends SQLBaseVisitor<QueryResult> {
     public QueryResult visitCheckpoint_stmt(SQLParser.Checkpoint_stmtContext ctx){
         //TODO
         try {
+            if (this.db.txManager.getTransactionState(this.sessionID)) {
+                this.db.txManager.commitTransaction(this.sessionID);
+                this.db.txManager.beginTransaction(this.sessionID);
+            }
+
             this.db.txManager.persistTable(this.sessionID);
             boolean result = this.db.walManager.clearLog();
+
             if (!result) {
                 return new QueryResult("Persist Failed: clear file failed, may try again later");
             }

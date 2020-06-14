@@ -51,6 +51,9 @@ public class TransactionManager {
                     TableP table = this.db.getTable(id);
                     if (table != null) {
                         table.currentSessionID = -1;
+                        table.actionType.clear();
+                        table.rowsForActions.clear();
+                        table.rowsForActionsAppend.clear();
                     }
                 }
             } catch (Exception e) {
